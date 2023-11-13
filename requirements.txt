@@ -1,0 +1,17 @@
+Flask
+werkzeug
+itsdangerous
+MarkupSafe
+Jinja2
+SQLAlchemy
+Flask-SQLAlchemy
+num2words
+pytz
+gunicorn[gevent]
+passlib
+pymysql
+Flask-CORS
+python-dotenv
+PyJWT
+flask-mysql
+mysqlclient
