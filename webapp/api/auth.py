@@ -9,3 +9,9 @@ from flask import (
 )
 
 bp = Blueprint('auth', __name__)
+
+
+
+@bp.route('/login', methods=['POST'])
+def login():
+    return 'hit'
