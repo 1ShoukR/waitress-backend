@@ -41,60 +41,21 @@ def create_app(config_paths:Iterable[Union[str, Path]]=None, **config_overrides)
     with app.app_context():
         models.db.init_app(app)
 
-    # Initialize CDN
-    # aws.cloudfront_init(app)
-
-    # Register jinja filters
-    # app.register_blueprint(commonfilters.bp)
-    # app.register_blueprint(jinjafilters.bp)
-    # app.jinja_env.filters['cloudfront'] = aws.cloudfront_filter
-
-    # Register view blueprints
-    # app.register_blueprint(views.public.bp)
-    # app.register_blueprint(views.create_account.bp)
-    # app.register_blueprint(views.teams.bp)
-    # app.register_blueprint(views.assigned_todos.bp)
-    app.register_blueprint(api.setup.bp, url_prefix='/setup')
-    # app.register_blueprint(views.admin_panel.bp)
-    # app.register_blueprint(views.test.bp, url_prefix='/test')
-
-    # Register API blueprints
-    # app.register_blueprint(api.password.bp, url_prefix='/api/password')
-    # # app.register_blueprint(api.login.bp, url_prefix='/api/login')
-    # app.register_blueprint(api.create_account.bp, url_prefix='/api/account')
-    # app.register_blueprint(api.auth.bp, url_prefix='/api/auth')
-    # app.register_blueprint(api.examplething.bp, url_prefix='/api/examplething') # CHANGEME Example blueprint. Delete in a real project
-    # app.register_blueprint(api.toDos.bp, url_prefix='/api/todos')
-    # app.register_blueprint(api.teams.bp, url_prefix='/api/teams')
-    # app.register_blueprint(api.admin_panel.bp, url_prefix='/api/admin_panel')
-    # app.register_blueprint(api.react_native_dummy_route.bp, url_prefix='/api/react_native_dummy_route')
-    # Before/after request registration
+    app.register_blueprint(api.setup.bp, url_prefix='/api/setup')
+    app.register_blueprint(api.user.bp, url_prefix='/api/user')
     app.before_request(before_request)
-
-    # Register error handlers
-    # app.register_error_handler(401, views.errorhandling.error_40x)
-    # app.register_error_handler(403, views.errorhandling.error_40x)
-    # app.register_error_handler(404, views.errorhandling.error_40x)
-    # app.register_error_handler(405, views.errorhandling.error_40x)
-    # app.register_error_handler(500, views.errorhandling.error_500)
-    # app.register_error_handler(Exception, views.errorhandling.unhandled_exception)
 
     # Register core function routes
     app.add_url_rule('/<path:resource>', 'serve_static_resource', serve_static_resource)
 
-    # # Jinja globals
-    # # Each given name here becomes available as a variable anywhere within templates
-    # # (use sparingly; only for things that should truly be global)
-    # app.jinja_env.globals['models'] = models
-    # app.jinja_env.globals['datums'] = datums
-    # app.jinja_env.globals['authgroups'] = authgroups
+
 
     return app
 
 
 def before_request():
     g.user = None
-    # g.timezone = current_app.config['TIMEZONE'] # This is expected by date_readability and time_readability filters, for localization
+    g.timezone = current_app.config['TIMEZONE'] # This is expected by date_readability and time_readability filters, for localization
     # g.root_url_full = f"{current_app.config['SCHEME']}://{current_app.config['ROOT_URL']}"
     # Database may not exist yet in these routes. 
     if request.endpoint in ('setup.db_init', 'setup.db_seed', ):
