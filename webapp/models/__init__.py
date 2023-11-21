@@ -4,5 +4,7 @@ db = SQLAlchemy()
 
 from . import (
     user,
-    restaurant
+    restaurant,
+    staff,
+    table,
 )
