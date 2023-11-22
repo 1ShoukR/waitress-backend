@@ -8,7 +8,7 @@ if t.TYPE_CHECKING:
 
 class Person(db.Model):
     """
-    Each person can be associated with a user 
+    Each person can be associated with a user or staff
     """
     __tablename__ = 'person'
     __table_args__ = {'extend_existing': True}
@@ -17,7 +17,12 @@ class Person(db.Model):
     first_name:str = sa.Column(sa.String(255), nullable=False)
     last_name:str = sa.Column(sa.String(255), nullable=False)
 
+    type = sa.Column(sa.String(50))  # Discriminator column
 
+    __mapper_args__ = {
+        'polymorphic_identity': 'person',
+        'polymorphic_on': type
+    }
 
 
 class User(db.Model):
