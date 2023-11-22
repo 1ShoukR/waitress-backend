@@ -9,7 +9,11 @@ if t.TYPE_CHECKING:
 
 
 class Table(db.Model):
-    id = sa.Column(sa.Integer, primary_key=True)
+    """
+    Represents a single table in a restaurant and the number of people it can fit
+    """
+    table_id = sa.Column(sa.Integer, primary_key=True)
     restaurant_id = sa.Column(sa.Integer, db.ForeignKey('restaurant.restaurant_id'), nullable=False)
+    table_number = sa.Column(sa.Integer, nullable=False)
     capacity = sa.Column(sa.Integer, nullable=False)
     location_description = sa.Column(sa.String(200))  # Description of the table's location
