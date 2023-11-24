@@ -2,9 +2,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
-from . import (
-    user,
-    restaurant,
-    staff,
-    table,
-)
+
+from .user import User, Person
+from .restaurant import Receipt, Restaurant, Reservation, MenuItem, Order
+from .staff import Staff
+from .table import Table
