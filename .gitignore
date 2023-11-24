@@ -2,4 +2,5 @@ venv/
 config/local.cfg
 __pycache__/
 webapp/api/__pycache__/
-webapp/models/__pycache__/
+webapp/models/__pycache__
+webapp/util/__pycache__/
