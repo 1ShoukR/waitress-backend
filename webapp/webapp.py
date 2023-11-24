@@ -43,6 +43,7 @@ def create_app(config_paths:Iterable[Union[str, Path]]=None, **config_overrides)
 
     app.register_blueprint(api.setup.bp, url_prefix='/api/setup')
     app.register_blueprint(api.user.bp, url_prefix='/api/user')
+    app.register_blueprint(api.restaurant.bp, url_prefix='/api/restaurant')
     app.before_request(before_request)
 
     # Register core function routes
