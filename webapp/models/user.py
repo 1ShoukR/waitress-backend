@@ -8,29 +8,37 @@ if t.TYPE_CHECKING:
 
 class Person(db.Model):
     """
-    Each person can be associated with a user or staff
+    Base class for a person. Each person can be a user or staff.
     """
     __tablename__ = 'person'
     __table_args__ = {'extend_existing': True}
 
-    person_id:int = sa.Column(sa.Integer, primary_key=True)
-    first_name:str = sa.Column(sa.String(255), nullable=False)
-    last_name:str = sa.Column(sa.String(255), nullable=False)
+    person_id = sa.Column(sa.Integer, primary_key=True)
+    first_name = sa.Column(sa.String(255), nullable=False)
+    last_name = sa.Column(sa.String(255), nullable=False)
 
-    type = sa.Column(sa.String(50))  # Discriminator column
+    type = sa.Column(sa.String(50))  # Discriminator column for polymorphic inheritance
+
+    created_at:'datetime' = sa.Column(sa.DateTime)
+    updated_at:'datetime' = sa.Column(sa.Date)
+    deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
 
     __mapper_args__ = {
         'polymorphic_identity': 'person',
         'polymorphic_on': type
     }
 
-
-class User(db.Model):
-    """Each row is a user of Waitress."""
+class User(Person):
+    """Represents a user of the application, inheriting from Person."""
     __tablename__ = 'user'
     __table_args__ = {'extend_existing': True}
 
-    user_id:int = sa.Column(sa.Integer, primary_key=True)
-    person_id:int = sa.Column(sa.Integer, sa.ForeignKey('person.person_id'))
-    email:str = sa.Column(sa.String(255), nullable=False)
-    password_hash:str = sa.Column(sa.String(255), nullable=False)
+    user_id = sa.Column(sa.Integer, sa.ForeignKey('person.person_id'), primary_key=True)
+    email = sa.Column(sa.String(255), nullable=False)
+    password_hash = sa.Column(sa.String(255), nullable=False)
+
+    __mapper_args__ = {
+        'polymorphic_identity': 'user'
+    }
+
+    # Define relationships, if any
