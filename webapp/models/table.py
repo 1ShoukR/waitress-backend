@@ -25,5 +25,5 @@ class Table(db.Model):
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
 
 
-    customer = orm.relationship('User', foreign_keys='User.user_id')
-    reservation = orm.relationship('Reservation', foreign_keys='Reservation.reservation_id')
+    # customer = orm.relationship('User', foreign_keys='User.user_id')
+    # reservation = orm.relationship('Reservation', foreign_keys='Reservation.reservation_id')

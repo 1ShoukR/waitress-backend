@@ -26,7 +26,7 @@ class Restaurant(db.Model):
     __tablename__ = 'restaurant'
     __table_args__ = {'extend_existing': True}
 
-    restaurant_id:int = sa.Column(sa.Integer, primary_key=True)
+    restaurant_id = sa.Column(sa.Integer, primary_key=True)
     owner_id:int = sa.Column(sa.Integer, sa.ForeignKey('user.user_id'))
     name:str = sa.Column(sa.String(255), nullable=False)
     address:str = sa.Column(sa.String(255), nullable=False)
@@ -38,13 +38,15 @@ class Restaurant(db.Model):
     updated_at:'datetime' = sa.Column(sa.Date)
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
     
-    # Explicit relationship to Receipt
-    receipts = orm.relationship('Receipt', foreign_keys='Receipt.restaurant_id')
+    # # Explicit relationship to Receipt
+    # receipts = orm.relationship('Receipt', foreign_keys='Receipt.restaurant_id')
+    # reservations = orm.relationship('Reservation',foreign_keys='Reservation.reservation_id')
 
 class Reservation(db.Model): 
     __tablename__ = 'reservation'
     __table_args__ = {'extend_existing': True}
     reservation_id = sa.Column(sa.Integer, primary_key=True)
+    restaurant_id = sa.Column(sa.Integer, sa.ForeignKey('restaurant.restaurant_id'))  # Foreign key to Restaurant
     user_id:int = sa.Column(sa.Integer, sa.ForeignKey('user.user_id'))
     table_id:int = sa.Column(sa.Integer, sa.ForeignKey('table.table_id'))
     time = sa.Column(sa.DateTime, nullable=False)
@@ -53,8 +55,8 @@ class Reservation(db.Model):
     updated_at:'datetime' = sa.Column(sa.Date)
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
 
-    restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
-    customer = orm.relationship('User', foreign_keys='User.user_id')
+    # restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
+    # customer = orm.relationship('User', foreign_keys='User.user_id')
 
 
 class MenuItem(db.Model):
@@ -70,7 +72,7 @@ class MenuItem(db.Model):
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
 
 
-    restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
+    # restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
 
 class Order(db.Model):
     __tablename__ = 'order'
@@ -81,6 +83,6 @@ class Order(db.Model):
     total:float = sa.Column(sa.Float)
     is_paid:bool = sa.Column(sa.Boolean, default=False)
 
-    restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
-    reservation = orm.relationship('Reservation', foreign_keys='Reservation.reservation_id')
-    customer = orm.relationship('User', foreign_keys='User.user_id')
+    # restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
+    # reservation = orm.relationship('Reservation', foreign_keys='Reservation.reservation_id')
+    # customer = orm.relationship('User', foreign_keys='User.user_id')
