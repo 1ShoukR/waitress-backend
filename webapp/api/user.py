@@ -19,15 +19,17 @@ def create():
     """
     Creates a new user. 
     """
-    if request.json.get('waiter'):
+    print(request.json)
+    waiter_data = request.json.get('waiter')
+    if waiter_data:
         new_waiter = models.User(
-            first_name=request.json.get('first_name'),
-            last_name=request.json.get('last_name'),
-            email=request.json.get('email_name'),
-            # password_hash=request.json.get('first_name'),
-            type='waiter'  # Set the type for polymorphic identity
+            first_name=waiter_data['first_name'],
+            last_name=waiter_data['last_name'],
+            email=waiter_data['email'],
+            password_hash=waiter_data['first_name'],  
+            type='waiter'  
         )
         models.db.session.add(new_waiter)
-
-        return 
+        models.db.session.commit()
+        return jsonify({'success': True})
     return 'SUCCESS'
