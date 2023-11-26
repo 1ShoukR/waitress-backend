@@ -39,8 +39,8 @@ class Restaurant(db.Model):
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
     
     # # Explicit relationship to Receipt
-    # receipts = orm.relationship('Receipt', foreign_keys='Receipt.restaurant_id')
-    # reservations = orm.relationship('Reservation',foreign_keys='Reservation.reservation_id')
+    receipts = orm.relationship('Receipt', foreign_keys='Receipt.restaurant_id')
+    reservations = orm.relationship('Reservation', foreign_keys='Reservation.restaurant_id')
 
 class Reservation(db.Model): 
     __tablename__ = 'reservation'
@@ -55,8 +55,8 @@ class Reservation(db.Model):
     updated_at:'datetime' = sa.Column(sa.Date)
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
 
-    # restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
-    # customer = orm.relationship('User', foreign_keys='User.user_id')
+    restaurant = orm.relationship('Restaurant', foreign_keys='Reservation.restaurant_id')
+    customer = orm.relationship('User', foreign_keys='Reservation.user_id')
 
 
 class MenuItem(db.Model):
@@ -84,5 +84,5 @@ class Order(db.Model):
     is_paid:bool = sa.Column(sa.Boolean, default=False)
 
     # restaurant = orm.relationship('Restaurant', foreign_keys='Restaurant.restaurant_id')
-    # reservation = orm.relationship('Reservation', foreign_keys='Reservation.reservation_id')
+    reservation = orm.relationship('Reservation', foreign_keys=[reservation_id])
     # customer = orm.relationship('User', foreign_keys='User.user_id')
