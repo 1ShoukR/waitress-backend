@@ -10,7 +10,8 @@ from pathlib import Path
 from typing import Iterable, Union
 from werkzeug.exceptions import NotFound
 from flask_cors import CORS
-from . import api, datums,  models
+from .api import routes as api
+from . import datums,  models
 from .utils.auth import authgroups, unauthorize
 from .models import db
 def create_app(config_paths:Iterable[Union[str, Path]]=None, **config_overrides) -> Flask:
