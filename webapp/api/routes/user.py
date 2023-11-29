@@ -14,25 +14,23 @@ bp = Blueprint('user', __name__)
 
 
 
-@bp.route('/create', methods=["POST"])
+@app.route('/create', methods=["POST"])
 def create():
-    # FUTUREUS Add a Waiter to a Staff object
     """
-    Creates a new user. 
+    Creates a new user.
     """
-    print(request.json)
-    user_data = request.json.get('waiter') or request.json.get('customer')
+    user_data = {k: v for k, v in request.form.items() if k not in ['password', 'user_role']}
     if user_data:
-        hash = sha256_crypt.using(rounds=1000).hash(user_data['password'])
-        user_type = 'waiter' if request.json.get('waiter') else 'customer'
-        new_user = models.User(
-            first_name=user_data['first_name'],
-            last_name=user_data['last_name'],
-            email=user_data['email'],
-            password_hash=hash,  
-            type=user_type 
-        )
-        # models.db.session.add(new_user)
-        # models.db.session.commit()
-        return jsonify({'success': True})
-    return 'SUCCESS'
+        sha_update = sha256_crypt.using(rounds=sha256_crypt.default_rounds)
+        user_data['password_hash'] = sha_update.hash(secret=request.form['password'])
+        user_type = 'waiter' if 'waiter' in request.form else 'customer'
+        new_user = {
+            'first_name': user_data['first_name'],
+            'last_name': user_data['last_name'],
+            'email': user_data['email'],
+            'password_hash': user_data['password_hash'],  
+            'type': user_type 
+        }
+        # Add code to save the user in the database
+        return jsonify({'success': True, 'new_user': new_user})
+    return jsonify({'success': False, 'message': 'Invalid data'})
