@@ -14,7 +14,7 @@ bp = Blueprint('user', __name__)
 
 
 
-@app.route('/create', methods=["POST"])
+@bp.route('/create', methods=["POST"])
 def create():
     """
     Creates a new user.
@@ -31,6 +31,8 @@ def create():
             'password_hash': user_data['password_hash'],  
             'type': user_type 
         }
-        # Add code to save the user in the database
+        print('new_user', new_user)
+        models.db.session.add(new_user)
+        models.db.session.commit()
         return jsonify({'success': True, 'new_user': new_user})
     return jsonify({'success': False, 'message': 'Invalid data'})
