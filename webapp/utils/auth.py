@@ -1,62 +1,87 @@
-class DotDict(dict):
-    def __getattr__(self, name):
-        if name in self:
-            if isinstance(self[name], dict):
-                return DotDict(self[name])
-            return self[name]
-        return super().__getattr__(name)
-
-    def __setattr__(self, name, value):
-        if name in self.keys():
-            self[name] = value
-        return super().__setattr__(name, value)
-    
-from flask import abort, flash, g, jsonify, redirect, request, session, url_for
+from flask import abort, flash, g, jsonify, redirect, request, session, url_for, current_app, g
 from functools import wraps
 from typing import Container
+import jwt
+import typing as t
+import datetime
 
 from .. import ERROR_MESSAGES, models
 
 
-# User types are defined as constants here to avoid hard-coding strings to refer to user types.
-# (So the string values could in theory change at the DB level.)
-#
-# Outside code may freely import and use these constants, 
-# but the `authgroups` object (see below) should be more commonly used.
-#
-# CHANGEME 
-# These can and should be changed to suit the needs of a project.
-# These are here only as example
+class DotDict(dict):
+    """A subclass of ``dict`` that allows key access (get and set) via dot-notation.
+    
+    This should only be used under controlled circumstances where keys are
+    guaranteed not to duplicate attribute names.
+
+    Usage example:
+
+    .. code-block:: python
+
+        d = DotDict(foo='bar')
+
+        d['foo'] # 'bar'
+        d.foo # 'bar'
+        d.foo = 'baz'
+        d['foo'] # baz
+    """
+    def __getattr__(self, name):
+        if name in self:
+            return DotDict(self[name]) if isinstance(self[name], dict) else self[name]
+        raise AttributeError(f"'DotDict' object has no attribute '{name}'")
+
+    def __setattr__(self, name, value):
+        self[name] = value
+
+
+# Each possible user type should be defined here
 DEV = 'dev'
-ADMIN_MASTER= 'admin_master'
+ADMIN_SUPER = 'admin_super'
 ADMIN = 'admin'
-CLIENT = 'client'
+EXECUTIVE = 'executive'
+STAFF_SUPER = 'staff_super'
+STAFF = 'staff'
+CUSTOMER = 'customer'
 
-USER_TYPE_NAMES = {
-    DEV: 'Developer',
-    ADMIN_MASTER: 'Master Admin',
-    ADMIN: 'Admin',
-    CLIENT: 'Client',
-}
-
-# These should always be sets so
-#   1. They can easily be unioned/intersected/complemented if needed
-#   2. Membership checks are O(1)
-#
-# EXAMPLE: To check if the logged-in user has master admin priveleges, use
-#     if g.user.user_type in authgroups.admin.all:
-#         ...
-authgroups = DotDict({
-    'admin': {
-        'master': {ADMIN_MASTER, DEV},
-        'all': {ADMIN_MASTER, ADMIN, DEV},
-    },
-    'client': {
-        'all': {CLIENT, ADMIN, ADMIN_MASTER, DEV},
-        'user': {CLIENT}
-    },
+#: Each of the values in this object should be entirely distinct sets 
+#: (aside from :all:). These are used to check exact membership of a user 
+#: type (e.g. someone is a user but NOT an admin), or to intersect groups.
+#:
+#: This should be expanded over time if/when new user types are added.
+usergroups = DotDict({
+    'dev': frozenset({DEV}),
+    'admin': frozenset({ADMIN_SUPER, ADMIN}),
+    'executive': frozenset({EXECUTIVE}),
+    'staff': frozenset({STAFF_SUPER, STAFF}),
+    'all': frozenset({DEV, ADMIN_SUPER, ADMIN, EXECUTIVE, STAFF_SUPER, STAFF, CUSTOMER}),
+    'all_ordered': (DEV, ADMIN_SUPER, ADMIN, EXECUTIVE, STAFF_SUPER, STAFF, CUSTOMER),
 })
-authgroups['all'] = authgroups.admin.all | authgroups.client.all
+
+
+#: These are hierarchical and meant to represent who gets permission to 
+#: do something, i.e. an authgroup represents not only the named group 
+#: itself, but everything "above" in the permission hierarchy.
+authgroups = DotDict(
+    dev={
+        'all': usergroups.dev,
+    },
+    admin={
+        'super': usergroups.dev | {ADMIN_SUPER},
+        'all': usergroups.dev | usergroups.admin,
+    },
+    executive={
+        'all': usergroups.dev | usergroups.admin | usergroups.executive,
+    },
+    staff={
+        'super': usergroups.dev | usergroups.admin | usergroups.executive | {STAFF_SUPER},
+        'all': usergroups.dev | usergroups.admin | usergroups.executive | usergroups.staff,
+    },
+    customer={
+        'all': usergroups.dev | usergroups.admin | usergroups.executive | usergroups.staff 
+    },
+    all=usergroups.all,
+)
+
 
 
 def authcheck(*user_types, redirect_to=None):
@@ -125,6 +150,17 @@ def authorized(user_types:Container[str]=None):
         return False
     return True
 
+
+def create_api_token(client_id:int, user_id:t.Optional[int]=None, keypair_secret:t.Optional[str]=None):
+    token_dict = dict(
+        client_id=client_id,
+
+    )
+    if user_id is not None:
+        token_dict['user_id'] = user_id
+    if keypair_secret is not None:
+        token_dict['keypair_secret'] = keypair_secret
+    return jwt.encode(token_dict, current_app.config['API_JWT_SECRET'], algorithm="HS256")
 
 def unauthorize():
     session.pop('logged_in', None)
