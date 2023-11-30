@@ -37,6 +37,8 @@ def create_app(config_paths:Iterable[Union[str, Path]]=None, **config_overrides)
         app.config.from_pyfile(absolute_path)
     for key, val in config_overrides.items():
         app.config[key] = val
+    if not app.config.get('API_JWT_SECRET'):
+        raise RuntimeError('API_JWT_SECRET config value not set')
 
     # Initialize database
     with app.app_context():
