@@ -11,9 +11,6 @@ config_absolute_paths = [Path(HERE, f'config/{config}.cfg') for config in CONFIG
 if APP_TO_LOAD == 'webapp':
     from webapp.webapp import create_app
     app = create_app(config_absolute_paths)
-# elif APP_TO_LOAD == 'cron':
-#     from cronapp.cronapp import create_app
-#     app = create_app(config_absolute_paths)
 else:
     raise NotImplementedError(f'Invalid APP_TO_LOAD {APP_TO_LOAD}')
 
