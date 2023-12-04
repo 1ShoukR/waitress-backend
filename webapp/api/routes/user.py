@@ -20,7 +20,7 @@ def create():
     print('request',request.json)
     print('Content-Type:', request.headers.get('Content-Type'))
 
-    user_data = {k: v for k, v in request.json.items() if k not in ['password', 'user_role']}
+    user_data = {k: v for k, v in request.json.items() if k not in ['password', 'user_type']}
     print(user_data)
     if user_data:
         existing_customer = models.User.query.filter_by(email=user_data['email']).first()
