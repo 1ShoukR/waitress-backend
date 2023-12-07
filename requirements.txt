@@ -15,4 +15,4 @@ python-dotenv
 PyJWT
 flask-mysql
 mysqlclient
-
+sphinx
