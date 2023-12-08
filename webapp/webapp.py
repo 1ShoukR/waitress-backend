@@ -2,7 +2,7 @@
 This file contains the application factory (create_app) for the primary web application associated with this project.
 """
 import pytz
-import os, json
+import os, json, re
 # from fishycdn import aws
 # from fishyflask import commonfilters
 from flask import current_app, Flask, g, request, send_from_directory, session
@@ -12,7 +12,8 @@ from werkzeug.exceptions import NotFound
 from flask_cors import CORS
 from .api import routes as api
 from . import datums,  models
-from .utils.auth import authgroups, unauthorize
+from .api import ERRORS, jsonify_error_code
+from .utils.auth import authgroups, unauthorize, decode_api_token
 from .models import db
 def create_app(config_paths:Iterable[Union[str, Path]]=None, **config_overrides) -> Flask:
     """
@@ -59,30 +60,36 @@ def create_app(config_paths:Iterable[Union[str, Path]]=None, **config_overrides)
 
 
 def before_request():
-    g.user = None
-    g.timezone = current_app.config['TIMEZONE'] # This is expected by date_readability and time_readability filters, for localization
-    # g.root_url_full = f"{current_app.config['SCHEME']}://{current_app.config['ROOT_URL']}"
-    # Database may not exist yet in these routes. 
-    if request.endpoint in ('setup.db_init', 'setup.db_seed', ):
-        session.clear() # Clear any former session to prevent potential confusion in setup routes
-        return
-    # If request is for static file, don't waste time on everything below. 
-    # Only g items necessary for errorhandling pages need to be defined
-    if request.endpoint in ('serve_static_resource', ):
-        return
+    """See :doc:`/dev/api/authentication`"""
+    g.client = None # The APIClient authorized for this request, if any
+    g.user = None # The User authorized for this request, if any
+    g.timezone = pytz.timezone(current_app.config['DEFAULT_TIMEZONE'])
 
-    # Typical implementation of getting a previously-authenticated g.user is below.
-    # May not apply to all projects.
-    if any(session.get(key, None) for key in ('logged_in', 'user_id', 'user_type')):
-        if all(session.get(key, None) for key in ('logged_in', 'user_id', 'user_type')):
-            g.user = models.User.query.filter_by(
-                active=True,
-                user_id=session['user_id'],
-                user_type=session['user_type'],
-            ).first()
-        if not g.user:
-            # Note this is called if one login-related session key is present, but not all three
-            unauthorize()
+    if 'Authorization' in request.headers:
+        auth_header = request.headers['Authorization'].strip()
+
+        if not re.match(r'^Bearer [^\s]+$', auth_header):
+            return jsonify_error_code(ERRORS.AUTH_HEADER_INVALID)
+        auth_token = auth_header.split()[1]
+
+        try:
+            auth_dict = decode_api_token(auth_token)
+        except Exception as exc:
+            return print('error ')
+            # We can log error here
+            # ref_id = log_exception('decode JWT', exc)
+            # return api.jsonify_error_code(api.ERRORS.AUTH_DECODE_ERROR, ref_id)
+
+        if not auth_dict.get('client_id'):
+            # FUTUREUS log this?
+            return jsonify_error_code(ERRORS.AUTH_DECODE_ERROR)
+
+        # If g.user or g.client are None after this point, that will be dealt with by e.g. authcheck.
+        # (Shouldn't bail here, because the requested endpoint may not require auth)
+        g.client = models.APIClient.query.filter_by(access_revoked=None, client_id=auth_dict['client_id']).first()
+        if auth_dict.get('user_id'):
+            g.user = models.User.query.filter_by(access_revoked=None, user_id=auth_dict['user_id']).first()
+
 
 
 def serve_static_resource(resource):
