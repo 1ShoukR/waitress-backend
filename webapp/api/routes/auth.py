@@ -6,6 +6,7 @@ from flask import (
     request,
     session,
     url_for,
+    g
 )
 import sqlalchemy as sa
 from ...utils.auth import create_api_token
@@ -25,10 +26,10 @@ def login():
     if user:
         verify_password = sha256_crypt.verify(hash=user.password_hash, secret=password)
         if verify_password:
-            if 'web' in request.form.get('user_agent'):
-                client = models.APIClient.query.filter_by(public_uid='web').first_or_404()
-            else:
-                client = models.APIClient.query.filter_by(public_uid='mobile').first_or_404()
+            client = models.APIClient.query.filter_by(public_uid='web' if 'web' in request.form.get('user_agent') else 'mobile').first_or_404()
             token = create_api_token(client_id=client.client_id, user_id=user.user_id)
-            return jsonify(user=user.first_name, user_type=user.type, token=token)
+            user_login = models.UserLogin(user_id=user.user_id, client_id=client.client_id, user_agent=client.public_uid)
+            models.db.session.add(user_login)
+        models.db.session.commit()
+        return jsonify(token=token, user=user.serialize())
     return jsonify_error_code(ERRORS.USER_NOT_FOUND)
