@@ -8,6 +8,7 @@ from flask import (
     url_for,
 )
 from passlib.hash import sha256_crypt
+from ...utils.seed import seed_api_clients_with_defaults
 from ... import models
 bp = Blueprint('db', __name__)
 
@@ -21,3 +22,12 @@ def db_init():
     """
     models.db.create_all()
     return 'SUCCESS'
+
+
+@bp.route('/db/seed-data')
+def seed():
+    try:
+        seed_api_clients_with_defaults(models.db.session)
+        return jsonify({'message': 'Databse seeded successfully'})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500 
