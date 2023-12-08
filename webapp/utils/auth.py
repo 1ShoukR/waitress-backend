@@ -79,11 +79,12 @@ authgroups = DotDict(
 
 
 
-def authcheck(*user_types, redirect_to=None):
+def authcheck(*auth_type, redirect_to=None):
+    print('USER TYPES', auth_type)
     """
     Wraps non-API route with default authorization.
 
-    :param *user_types: Passed to authorized() function.
+    :param *auth_type: Passed to authorized() function.
     :param redirect_to: Endpoint name to which to redirect on authorization failure
 
     EXAMPLE:
@@ -94,13 +95,14 @@ def authcheck(*user_types, redirect_to=None):
         # The route code can safely assume that g.user exists, and the user is an admin
         ...
     """
-    # Allow passing a single iterable of user_types OR unpacking an iterable
-    if len(user_types) == 1 and isinstance(user_types[0], (list, tuple, set)):
-        user_types = user_types[0]
+    # Allow passing a single iterable of auth_type OR unpacking an iterable
+    if len(auth_type) == 1 and isinstance(auth_type[0], (list, tuple, set)):
+        print('USER TYPES', auth_type)
+        auth_type = auth_type[0]
     def inner_fn(fn):
         @wraps(fn)
         def decorated_fn(*args, **kwargs):
-            if not authorized(user_types):
+            if not authorized(auth_type):
                 if redirect_to:
                     return redirect(url_for(redirect_to or 'public.login')) # CHANGEME public.login may not exist
                 else:
@@ -134,17 +136,17 @@ def authcheck_api(*user_types, flash_and_redirect:bool=False, redirect_to:str=No
     return inner_fn
 
 
-def authorized(user_types:Container[str]=None):
+def authorized(auth_types: Container[str] = None):
     if not session.get('logged_in'):
         return False
     if not g.get('user', None):
-        # Something has gone wrong if session['logged_in'] is set but g.user is false-y. Unauthorize session entirely.
         unauthorize() 
         return False
-    if user_types and g.user.user_type not in user_types:
+    if isinstance(auth_types, tuple) and len(auth_types) == 1 and isinstance(auth_types[0], frozenset):
+        auth_types = auth_types[0]
+    if auth_types and g.user.auth_type not in auth_types:
         return False
     return True
-
 
 def create_api_token(client_id:int, user_id:t.Optional[int]=None, keypair_secret:t.Optional[str]=None):
     token_dict = dict(
