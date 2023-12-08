@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 
-from .user import User, Person, UserLogin, Customer
+from .user import User, Entity, UserLogin, Customer
 from .restaurant import Receipt, Restaurant, Reservation, MenuItem, Order
 from .staff import Staff
 from .table import Table
