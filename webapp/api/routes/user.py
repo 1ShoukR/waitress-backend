@@ -10,7 +10,8 @@ from flask import (
 )
 from passlib.hash import sha256_crypt
 from ... import models
-from ...utils.auth import create_api_token, authgroups
+from ...utils.auth import create_api_token, authgroups, authcheck
+from ...utils.general import user_factory, set_auth_type
 bp = Blueprint('user', __name__)
 
 
@@ -26,42 +27,8 @@ def create():
         return jsonify({'success': False, 'message': 'Email already exists'}), 409
     password_hash = sha256_crypt.hash(request.json.get('password'))
     user_type = request.json.get('user_type').lower()
-    if user_type in authgroups.staff.all:
-        auth_type = 'staff'
-        print('auth', auth_type)
-    elif user_type in authgroups.customer.all:
-        auth_type = 'customer'
-        print('auth', auth_type)
-    elif user_type in authgroups.admin.all:
-        auth_type = 'admin'
-        print('auth', auth_type)
-    else:
-        auth_type = 'user'  # Default auth type
-        print('auth', auth_type)
-    if user_type == 'staff':
-        new_user = models.Staff(
-            first_name=request.json.get('first_name'),
-            last_name=request.json.get('last_name'),
-            email=request.json.get('email'),
-            password_hash=password_hash,
-            auth_type=auth_type  # Set the auth_type
-        )
-    elif user_type == 'customer':
-        new_user = models.Customer(
-            first_name=request.json.get('first_name'),
-            last_name=request.json.get('last_name'),
-            email=request.json.get('email'),
-            password_hash=password_hash,
-            auth_type=auth_type  # Set the auth_type
-        )
-    else:
-        new_user = models.User(
-            first_name=request.json.get('first_name'),
-            last_name=request.json.get('last_name'),
-            email=request.json.get('email'),
-            password_hash=password_hash,
-            auth_type=auth_type  # Set the auth_type
-        )
+    auth_type = set_auth_type(user_type)
+    new_user = user_factory(user_type, first_name=request.json.get('first_name'), last_name=request.json.get('last_name'), email=request.json.get('email'),  password_hash=password_hash, auth_type=auth_type)
     models.db.session.add(new_user)
     models.db.session.commit()
     client = models.APIClient.query\
@@ -74,5 +41,6 @@ def create():
 
 
 @bp.route('/test')
+@authcheck(authgroups.staff.all)
 def test():
     return 'test route hit'
