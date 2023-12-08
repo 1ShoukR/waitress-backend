@@ -31,5 +31,11 @@ def login():
             user_login = models.UserLogin(user_id=user.user_id, client_id=client.client_id, user_agent=client.public_uid)
             models.db.session.add(user_login)
         models.db.session.commit()
+        session['api_token'] = token
+        session['user_id'] = user.user_id
+        session['auth_type'] = user.auth_type
+        session['type'] = user.type
+        session['logged_in'] = True
+        print('session', session)
         return jsonify(token=token, user=user.serialize())
     return jsonify_error_code(ERRORS.USER_NOT_FOUND)
