@@ -9,7 +9,7 @@ if t.TYPE_CHECKING:
 
 
 
-class Staff(db.Model):
+class Staff(User):
     """
     Represents a singular Staff user in thge database
     """
