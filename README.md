@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is the project repository for Equimanager.
+This is the project repository for Waotress.
 
 ## Getting Started
 
