@@ -6,14 +6,13 @@ if t.TYPE_CHECKING:
     from datetime import datetime
 
 
-class Person(db.Model):
+class Entity(db.Model):
     """
     Base class for a person. Each person can be a user or staff.
     """
-    __tablename__ = 'person'
     __table_args__ = {'extend_existing': True}
 
-    person_id = sa.Column(sa.Integer, primary_key=True)
+    entity_id = sa.Column(sa.Integer, primary_key=True)
     first_name = sa.Column(sa.String(255), nullable=False)
     last_name = sa.Column(sa.String(255), nullable=False)
 
@@ -23,24 +22,21 @@ class Person(db.Model):
     updated_at:'datetime' = sa.Column(sa.Date)
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'person',
-        'polymorphic_on': type
-    }
 
-class User(Person):
+class User(Entity):
     """Represents a user of the application, inheriting from Person."""
     __tablename__ = 'user'
     __table_args__ = {'extend_existing': True}
+    __mapper_args__ = {
+        'polymorphic_identity': 'user',
+    }
 
-    user_id = sa.Column(sa.Integer, sa.ForeignKey('person.person_id'), primary_key=True)
+    user_id = sa.Column(sa.Integer, sa.ForeignKey('entity.entity_id'), primary_key=True)
     email = sa.Column(sa.String(255), nullable=False)
     password_hash = sa.Column(sa.String(255), nullable=False)
+    access_revoked = sa.Column(sa.Boolean, default=None)
+    auth_type = sa.Column(sa.String(50))
 
-    __mapper_args__ = {
-        'polymorphic_identity': 'user'
-    }
-    
     def serialize(self):
         """Returns a serialized entity of itself"""
         return {
@@ -56,10 +52,6 @@ class User(Person):
 class Customer(User):
     __tablename__ = 'customer'
     customer_id = sa.Column(sa.Integer, sa.ForeignKey('user.user_id'), primary_key=True)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'customer',
-    }
 
 class UserLogin(db.Model):
     """A user login.
