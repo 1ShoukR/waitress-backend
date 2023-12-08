@@ -1,7 +1,8 @@
 Utils
 =====
 
-.. This section should detail the utility functions and classes in Waitress.
+Waitress has a set of utilities that can help an engineer with day to day tasks.
+These utilities can range from decorators, seeding functions, API token creation, API Decoding, etc
 
 Overview of Utilities
 ---------------------

@@ -11,7 +11,6 @@ Introduction
 
 .. include:: ./introduction.rst
 
-Waitress is a production-grade server for Python web applications. This documentation covers how Waitress can be used and configured, along with information about its various components.
 
 .. toctree::
    :maxdepth: 2
@@ -27,57 +26,50 @@ Waitress is a production-grade server for Python web applications. This document
    api
    contributing
 
-Utils
------
+
 
 .. include:: ./utils.rst
 
-This section covers the various utility functions and classes provided by Waitress.
+This section covers the various utility functions that can help with development
+and authentication. 
 
-Models
-------
+
 
 .. include:: ./models.rst
 
 Documentation on the data models used within Waitress.
 
-Authentication
---------------
+
 
 .. include:: ./authentication.rst
 
 Details on authentication mechanisms and how to implement them in Waitress.
 
-Routes
-------
+
 
 .. include:: ./routes.rst
 
 Guide to defining and working with routes in Waitress.
 
-Configuration
--------------
+
 
 .. include:: ./configuration.rst
 
 Instructions on configuring your Waitress application.
 
-Deployment
-----------
+
 
 .. include:: ./deployment.rst
 
 Tips and best practices for deploying Waitress applications.
 
-API Reference
--------------
 
-.. include:: ./api_reference.rst
+
+.. include:: ./api.rst
 
 A comprehensive reference of Waitress's API.
 
-Contributing
-------------
+
 
 .. include:: ./contributing.rst
 
