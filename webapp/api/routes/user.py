@@ -6,10 +6,11 @@ from flask import (
     request,
     session,
     url_for,
+    g
 )
 from passlib.hash import sha256_crypt
 from ... import models
-from ...utils.auth import create_api_token
+from ...utils.auth import create_api_token, authgroups
 bp = Blueprint('user', __name__)
 
 
@@ -17,33 +18,61 @@ bp = Blueprint('user', __name__)
 
 @bp.route('/create', methods=["POST"])
 def create():
-    print('request',request.json)
-    print('Content-Type:', request.headers.get('Content-Type'))
-
-    user_data = {k: v for k, v in request.json.items() if k not in ['password', 'user_type']}
-    print(user_data)
-    if user_data:
-        existing_customer = models.User.query.filter_by(email=user_data['email']).first()
-        if existing_customer:
-            return jsonify({'success': False, 'message': 'Email already exists'})
-        sha_update = sha256_crypt.using(rounds=sha256_crypt.default_rounds)
-        password_hash = sha_update.hash(request.json['password'])
-        user_type = 'waiter' if 'waiter' in request.json else 'customer'
-        new_user = models.User(
-            first_name=user_data['first_name'],
-            last_name=user_data['last_name'],
-            email=user_data['email'],
+    # Validate received data
+    if not all(key in request.json for key in ['first_name', 'last_name', 'email', 'password', 'user_type']):
+        return jsonify({'success': False, 'message': 'Missing required fields'}), 400
+    existing_user = models.User.query.filter_by(email=request.json.get('email')).first()
+    if existing_user:
+        return jsonify({'success': False, 'message': 'Email already exists'}), 409
+    password_hash = sha256_crypt.hash(request.json.get('password'))
+    user_type = request.json.get('user_type').lower()
+    if user_type in authgroups.staff.all:
+        auth_type = 'staff'
+        print('auth', auth_type)
+    elif user_type in authgroups.customer.all:
+        auth_type = 'customer'
+        print('auth', auth_type)
+    elif user_type in authgroups.admin.all:
+        auth_type = 'admin'
+        print('auth', auth_type)
+    else:
+        auth_type = 'user'  # Default auth type
+        print('auth', auth_type)
+    if user_type == 'staff':
+        new_user = models.Staff(
+            first_name=request.json.get('first_name'),
+            last_name=request.json.get('last_name'),
+            email=request.json.get('email'),
             password_hash=password_hash,
-            type=user_type
+            auth_type=auth_type  # Set the auth_type
         )
-        models.db.session.add(new_user)
-        models.db.session.commit()
-        created_user = models.User.query.filter_by(email=user_data['email']).first()
-        client = models.APIClient.query\
-            .with_entities(models.APIClient.client_id)\
-            .filter_by(public_uid='web')\
-            .first()
-        if created_user:
-            token = create_api_token(client_id=client.client_id, user_id=created_user.user_id)
-            return jsonify({'success': True, 'created_user': created_user.serialize(), 'token':token})
-    return jsonify({'success': False, 'message': 'Invalid data'})
+    elif user_type == 'customer':
+        new_user = models.Customer(
+            first_name=request.json.get('first_name'),
+            last_name=request.json.get('last_name'),
+            email=request.json.get('email'),
+            password_hash=password_hash,
+            auth_type=auth_type  # Set the auth_type
+        )
+    else:
+        new_user = models.User(
+            first_name=request.json.get('first_name'),
+            last_name=request.json.get('last_name'),
+            email=request.json.get('email'),
+            password_hash=password_hash,
+            auth_type=auth_type  # Set the auth_type
+        )
+    models.db.session.add(new_user)
+    models.db.session.commit()
+    client = models.APIClient.query\
+        .with_entities(models.APIClient.client_id)\
+        .filter_by(public_uid='web')\
+        .first()
+    token = create_api_token(client_id=client.client_id, user_id=new_user.user_id)
+    return jsonify({'success': True, 'created_user': new_user.serialize(), 'token': token}), 201
+
+
+
+@bp.route('/test')
+def test():
+    return 'test route hit'
