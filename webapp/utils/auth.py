@@ -35,10 +35,9 @@ class DotDict(dict):
 
 
 # Each possible user type should be defined here
-DEV = 'dev'
-ADMIN_SUPER = 'admin_super'
-ADMIN = 'admin'
-EXECUTIVE = 'executive'
+DEV = 'dev' # Developers
+ADMIN_SUPER = 'admin_super' # Restaurant Owners
+ADMIN = 'admin' # Managers? 
 STAFF_SUPER = 'staff_super'
 STAFF = 'staff'
 CUSTOMER = 'customer'
@@ -51,10 +50,9 @@ CUSTOMER = 'customer'
 usergroups = DotDict({
     'dev': frozenset({DEV}),
     'admin': frozenset({ADMIN_SUPER, ADMIN}),
-    'executive': frozenset({EXECUTIVE}),
     'staff': frozenset({STAFF_SUPER, STAFF}),
-    'all': frozenset({DEV, ADMIN_SUPER, ADMIN, EXECUTIVE, STAFF_SUPER, STAFF, CUSTOMER}),
-    'all_ordered': (DEV, ADMIN_SUPER, ADMIN, EXECUTIVE, STAFF_SUPER, STAFF, CUSTOMER),
+    'all': frozenset({DEV, ADMIN_SUPER, ADMIN, STAFF_SUPER, STAFF, CUSTOMER}),
+    'all_ordered': (DEV, ADMIN_SUPER, ADMIN, STAFF_SUPER, STAFF, CUSTOMER),
 })
 
 
@@ -69,15 +67,12 @@ authgroups = DotDict(
         'super': usergroups.dev | {ADMIN_SUPER},
         'all': usergroups.dev | usergroups.admin,
     },
-    executive={
-        'all': usergroups.dev | usergroups.admin | usergroups.executive,
-    },
     staff={
-        'super': usergroups.dev | usergroups.admin | usergroups.executive | {STAFF_SUPER},
-        'all': usergroups.dev | usergroups.admin | usergroups.executive | usergroups.staff,
+        'super': usergroups.dev | usergroups.admin  | {STAFF_SUPER},
+        'all': usergroups.dev | usergroups.admin | usergroups.staff,
     },
     customer={
-        'all': usergroups.dev | usergroups.admin | usergroups.executive | usergroups.staff 
+        'all': usergroups.dev | usergroups.admin | usergroups.staff | usergroups.all
     },
     all=usergroups.all,
 )
