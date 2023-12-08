@@ -162,6 +162,9 @@ def create_api_token(client_id:int, user_id:t.Optional[int]=None, keypair_secret
         token_dict['keypair_secret'] = keypair_secret
     return jwt.encode(token_dict, current_app.config['API_JWT_SECRET'], algorithm="HS256")
 
+def decode_api_token(token):
+    return jwt.decode(token, current_app.config['API_JWT_SECRET'], algorithms=["HS256"])
+
 def unauthorize():
     session.pop('logged_in', None)
     session.pop('user_id', None)
