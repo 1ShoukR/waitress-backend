@@ -6,6 +6,7 @@
 FLASK_APP=wsgi:app
 FLASK_ENV=development
 FLASK_RUN_PORT=3000
+FLASK_DEBUG=1
 #FLASK_RUN_HOST=0.0.0.0 # Uncomment to expose application to LAN
 
 # ~~~ Everything below is custom, and used in wsgi.py ~~~
