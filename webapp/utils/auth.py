@@ -80,7 +80,6 @@ authgroups = DotDict(
 
 
 def authcheck(*auth_type, redirect_to=None):
-    print('USER TYPES', auth_type)
     """
     Wraps non-API route with default authorization.
 
@@ -97,7 +96,6 @@ def authcheck(*auth_type, redirect_to=None):
     """
     # Allow passing a single iterable of auth_type OR unpacking an iterable
     if len(auth_type) == 1 and isinstance(auth_type[0], (list, tuple, set)):
-        print('USER TYPES', auth_type)
         auth_type = auth_type[0]
     def inner_fn(fn):
         @wraps(fn)

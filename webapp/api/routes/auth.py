@@ -27,6 +27,7 @@ def login():
         verify_password = sha256_crypt.verify(hash=user.password_hash, secret=password)
         if verify_password:
             client = models.APIClient.query.filter_by(public_uid='web' if 'web' in request.form.get('user_agent') else 'mobile').first_or_404()
+            print('client', client)
             token = create_api_token(client_id=client.client_id, user_id=user.user_id)
             user_login = models.UserLogin(user_id=user.user_id, client_id=client.client_id, user_agent=client.public_uid)
             models.db.session.add(user_login)
