@@ -40,6 +40,11 @@ def create():
 
 
 
+# @bp.route('/staff/create')
+# def staff_create():
+#     user = models.User.query.
+#     pass
+
 @bp.route('/test')
 @authcheck(authgroups.staff.all)
 def test():
