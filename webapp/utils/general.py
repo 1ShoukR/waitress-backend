@@ -1,5 +1,8 @@
 from .. import models
 from .auth import authgroups
+from flask import jsonify, request
+import typing as t
+from functools import wraps
 
 def user_factory(user_type, **kwargs):
     user_classes = {
@@ -26,3 +29,67 @@ def set_auth_type(user_type):
         'admin': 'admin'
     }
     return auth_type_mapping.get(user_type, 'user')
+
+
+
+
+def validate_incoming(
+    required: t.Optional[t.Iterable[str]] = None, 
+    required_truthy: t.Optional[t.Iterable[str]] = None,
+    required_any=None, 
+    optional: t.Optional[t.Iterable[str]] = None,
+    optional_truthy: t.Optional[t.Iterable[str]] = None,
+    restrictive: bool = False,
+    required_any_allows_falsey: bool = False
+):
+
+
+    required = required or []
+    required_truthy = required_truthy or []
+    required_any = required_any or []
+    optional = optional or []
+    optional_truthy = optional_truthy or []
+    required_any_flat = {x for sub in required_any for x in sub}
+
+    def inner_fn(fn):
+        @wraps(fn)
+        def decorated_fn(*args, **kwargs):
+            if request.method != 'POST':
+                return fn(*args, **kwargs)
+
+            missing = [attr for attr in required if attr not in request.form]
+            missing.extend(attr for attr in required_truthy if not request.form.get(attr, '').strip())
+            if missing:
+                return jsonify({"error": "Missing required parameters", "details": missing}), 400
+
+            missing_optional = [attr for attr in optional_truthy if attr in request.form and not request.form.get(attr, '').strip()]
+            if missing_optional:
+                return jsonify({"error": "Missing optional truthy value", "details": missing_optional}), 400
+
+            if not request.form and not optional and not optional_truthy:
+                return jsonify({"error": "Empty request"}), 400
+
+            if restrictive:
+                allowed_keys = set(required + required_truthy + list(required_any_flat) + optional + optional_truthy)
+                unexpected_args = [key for key in request.form if key not in allowed_keys]
+                if unexpected_args:
+                    return jsonify({"error": "Unexpected arguments", "details": unexpected_args}), 400
+
+            if required_any:
+                any_valid = False
+                for iterable_of_keys in required_any:
+                    if not required_any_allows_falsey:
+                        if any(request.form.get(key) for key in iterable_of_keys):
+                            any_valid = True
+                            break
+                    else:
+                        if any(key in request.form for key in iterable_of_keys):
+                            any_valid = True
+                            break
+                if not any_valid:
+                    return jsonify({"error": "Missing at least one required parameter", "details": list(required_any_flat)}), 400
+
+            return fn(*args, **kwargs)
+
+        return decorated_fn
+    return inner_fn
