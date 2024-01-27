@@ -41,6 +41,18 @@ class Restaurant(db.Model):
     # # Explicit relationship to Receipt
     receipts = orm.relationship('Receipt', foreign_keys='Receipt.restaurant_id')
     reservations = orm.relationship('Reservation', foreign_keys='Reservation.restaurant_id')
+    # owner = orm.relationship('User', foreign_keys='User.user_id')
+
+    def serialize(self, *args, **kwargs):
+        serialized = {
+            'owner_id': self.owner_id,
+            'address': self.address,
+            'phone': self.phone,
+            'email': self.email,
+            'website': self.website,
+            'number_of_tables': self.number_of_tables,
+        }
+        return serialized
 
 class Reservation(db.Model): 
     __tablename__ = 'reservation'
