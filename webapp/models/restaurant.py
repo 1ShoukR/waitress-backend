@@ -41,6 +41,12 @@ class Restaurant(db.Model):
     # # Explicit relationship to Receipt
     receipts = orm.relationship('Receipt', foreign_keys='Receipt.restaurant_id')
     reservations = orm.relationship('Reservation', foreign_keys='Reservation.restaurant_id')
+    owner = orm.relationship(
+        "User", 
+        primaryjoin="and_(User.user_id==Restaurant.owner_id, Entity.entity_id==User.user_id)",
+        foreign_keys=[owner_id],
+        uselist=False
+        )
     # owner = orm.relationship('User', foreign_keys='User.user_id')
 
     def serialize(self, *args, **kwargs):
