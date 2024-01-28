@@ -37,6 +37,6 @@ def create():
 
 
 
-@bp.route('/tables/<int:id>/reserve', methods=["POST"])
+@bp.route('/tables/<int:restaurant_id>/reserve', methods=["POST"])
 def reserve(table_id):
     pass
