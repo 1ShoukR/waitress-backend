@@ -37,6 +37,20 @@ def create():
 
 
 
+@bp.route('/<int:restaurant_id/get', methods=["POST"])
+@bp.route('/get', methods=["GET"])
+# FUTUREUS
+# We need to get the geolocation of a user
+# and query the database for restaurants based on that 
+# Then we compare with the Haversige formula
+def restaurant(restaurant_id):
+    if restaurant_id:
+        restaurant = models.Restaurant.query.filter_by(restaurant_id=restaurant_id).first_or_404()
+        return jsonify(success=True, data=restaurant.serialize())
+    restaurant = models.Restaurant.query.all()
+    return
+
+
 @bp.route('/tables/<int:restaurant_id>/reserve', methods=["POST"])
 def reserve(table_id):
     pass
