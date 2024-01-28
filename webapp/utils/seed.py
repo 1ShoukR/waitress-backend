@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from .. import models
 from passlib.hash import sha256_crypt
-import datetime
+import random
 
 def seed_api_clients_with_defaults(db_session: Session):
     """Seed the database with specific API client data."""
@@ -128,11 +128,11 @@ def seed_api_clients_with_defaults(db_session: Session):
     ]
 
     default_restaurants = [
-        {"name": "Grill House", "address": "123 Main St", "phone": "123-456-7890", "email": "contact@grillhouse.com"},
-        {"name": "Pasta Paradise", "address": "456 Pasta Lane", "phone": "456-789-0123", "email": "info@pastaparadise.com"},
-        {"name": "Sushi World", "address": "789 Sushi Blvd", "phone": "789-012-3456", "email": "contact@sushiworld.com"},
-        {"name": "Taco Land", "address": "101 Taco Way", "phone": "234-567-8901", "email": "hello@tacoland.com"},
-        {"name": "Pizza Central", "address": "321 Pizza Street", "phone": "567-890-1234", "email": "info@pizzacentral.com"}
+        {"name": "Grill House", "address": "123 Main St", "phone": "123-456-7890", "email": "contact@grillhouse.com", "number_of_tables": random.randint(10, 30)},
+        {"name": "Pasta Paradise", "address": "456 Pasta Lane", "phone": "456-789-0123", "email": "info@pastaparadise.com", "number_of_tables": random.randint(10, 30)},
+        {"name": "Sushi World", "address": "789 Sushi Blvd", "phone": "789-012-3456", "email": "contact@sushiworld.com", "number_of_tables": random.randint(10, 30)},
+        {"name": "Taco Land", "address": "101 Taco Way", "phone": "234-567-8901", "email": "hello@tacoland.com", "number_of_tables": random.randint(10, 30)},
+        {"name": "Pizza Central", "address": "321 Pizza Street", "phone": "567-890-1234", "email": "info@pizzacentral.com", "number_of_tables": random.randint(10, 30)}
     ]
 
     for client_data in default_clients:
@@ -160,7 +160,8 @@ def seed_api_clients_with_defaults(db_session: Session):
                         name=restaurant_data['name'],
                         address=restaurant_data['address'],
                         phone=restaurant_data['phone'],
-                        email=restaurant_data['email']
+                        email=restaurant_data['email'],
+                        number_of_tables=restaurant_data["number_of_tables"]
                     )
                     db_session.add(restaurant)
         if 'customer' in data:
