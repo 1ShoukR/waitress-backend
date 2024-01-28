@@ -34,6 +34,8 @@ class Restaurant(db.Model):
     email:str = sa.Column(sa.String(255), nullable=False)
     website:str = sa.Column(sa.String(255))
     number_of_tables:int = sa.Column(sa.Integer)
+    latitude:float = sa.Column(sa.FLoat)
+    longitude:float = sa.Column(sa.FLoat)
     created_at:'datetime' = sa.Column(sa.Date)
     updated_at:'datetime' = sa.Column(sa.Date)
     deleted_at:'datetime' = sa.Column(sa.DateTime, nullable=True)
