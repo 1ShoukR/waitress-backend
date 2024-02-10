@@ -188,7 +188,9 @@ def seed_api_clients_with_defaults(db_session: Session):
                     email=owner_data['email'],
                     password_hash=hashed_password,
                     type='owner',  
-                    auth_type='admin_super'  
+                    auth_type='admin_super',
+                    latitude=owner_data['latitude'],
+                    longitude=owner_data['longitude']
                 )
                 db_session.add(owner)
                 db_session.commit() 
@@ -200,7 +202,9 @@ def seed_api_clients_with_defaults(db_session: Session):
                         address=restaurant_data['address'],
                         phone=restaurant_data['phone'],
                         email=restaurant_data['email'],
-                        number_of_tables=restaurant_data["number_of_tables"]
+                        number_of_tables=restaurant_data["number_of_tables"],
+                        latitude=restaurant_data['latitude'],
+                        longitude=restaurant_data['longitude']
                     )
                     db_session.add(restaurant)
         if 'customer' in data:
@@ -213,7 +217,9 @@ def seed_api_clients_with_defaults(db_session: Session):
                     email=customer_data['email'],
                     password_hash=hashed_password,
                     type='customer',  
-                    auth_type='customer'  
+                    auth_type='customer',
+                    latitude=customer_data['latitude'],
+                    longitude=customer_data['longitude']
                 )
                 db_session.add(customer)
     db_session.commit()
