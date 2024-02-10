@@ -47,7 +47,9 @@ class User(Entity):
             'last_name': self.last_name,
             'email': self.email,
             'type': self.type,
-            'auth_type': self.auth_type
+            'auth_type': self.auth_type,
+            'latitude': self.latitude,
+            'longitude': self.longitude
             # Add other fields as necessary
         }
 
