@@ -22,6 +22,8 @@ bp = Blueprint('auth', __name__)
 def login():
     email = request.form.get('email')
     password = request.form.get('password')
+    if not email or not password:
+        return jsonify_error_code(ERRORS.AUTH_USER_REQUIRED)
     user = models.User.query.filter(sa.func.lower(models.User.email) == email.lower()).first_or_404()
     if user:
         verify_password = sha256_crypt.verify(hash=user.password_hash, secret=password)
