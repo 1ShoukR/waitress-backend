@@ -3,7 +3,13 @@ from .. import models
 from passlib.hash import sha256_crypt
 import random
 
+
+
 def seed_api_clients_with_defaults(db_session: Session):
+    def generate_geolocation(base_lat=40.730610, base_long=-73.935242, variance=0.01):
+        """Generate a random geolocation near the base point."""
+        return base_lat + random.uniform(-variance, variance), base_long + random.uniform(-variance, variance)
+
     """Seed the database with specific API client data."""
     default_clients = [
         {
@@ -22,16 +28,16 @@ def seed_api_clients_with_defaults(db_session: Session):
             "secret": "JM143w-tGYzStrNE8H4PN7hO67qGHVZJ",
             "previous_secret": None,
             "client_type": "ios",
-            "name": "waitress-mobile-frontend"
-        }
+            "name": "waitress-mobile-ios"
+        },
         {
             "access_revoked": None, 
             "last_secret_rotation": None,
             "public_uid": "mobile",
-            "secret": "JM143w-tGYzStrNE8H4PN7hO67qGHVZJ",
+            "secret": 'b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"',
             "previous_secret": None,
             "client_type": "android",
-            "name": "waitress-mobile-frontend"
+            "name": "waitress-mobile-android"
         }
     ]
 
@@ -44,7 +50,9 @@ def seed_api_clients_with_defaults(db_session: Session):
             "email": "rahminshoukoohi@gmail.com",
             "auth_type": "owner",
             "password_hash": "Test123!",
-            "auth_type": "admin_super"
+            "auth_type": "admin_super",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Jane",
@@ -52,7 +60,9 @@ def seed_api_clients_with_defaults(db_session: Session):
             "email": "janesmith@example.com",
             "auth_type": "owner",
             "password_hash": "Test123!",
-            "auth_type": "admin_super"
+            "auth_type": "admin_super",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Alice",
@@ -60,7 +70,9 @@ def seed_api_clients_with_defaults(db_session: Session):
             "email": "alicejohnson@example.com",
             "auth_type": "owner",
             "password_hash": "Test123!",
-            "auth_type": "admin_super"
+            "auth_type": "admin_super",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Bob",
@@ -68,7 +80,9 @@ def seed_api_clients_with_defaults(db_session: Session):
             "email": "bobbrown@example.com",
             "auth_type": "owner",
             "password_hash": "Test123!",
-            "auth_type": "admin_super"
+            "auth_type": "admin_super",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Carol",
@@ -76,7 +90,9 @@ def seed_api_clients_with_defaults(db_session: Session):
             "email": "caroldavis@example.com",
             "auth_type": "owner",
             "password_hash": "Test123!",
-            "auth_type": "admin_super"
+            "auth_type": "admin_super",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "David",
@@ -84,7 +100,9 @@ def seed_api_clients_with_defaults(db_session: Session):
             "email": "davidwilson@example.com",
             "auth_type": "owner",
             "password_hash": "Test123!",
-            "auth_type": "admin_super"
+            "auth_type": "admin_super",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Eve",
@@ -92,7 +110,9 @@ def seed_api_clients_with_defaults(db_session: Session):
             "email": "evemiller@example.com",
             "auth_type": "owner",
             "password_hash": "Test123!",
-            "auth_type": "admin_super"
+            "auth_type": "admin_super",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         }
     ],
     "customer": [
@@ -101,35 +121,45 @@ def seed_api_clients_with_defaults(db_session: Session):
             "last_name": "Taylor",
             "email": "emilytaylor@example.com",
             "auth_type": "customer",
-            "password_hash": "Cust123!"
+            "password_hash": "Cust123!",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "James",
             "last_name": "Anderson",
             "email": "jamesanderson@example.com",
             "auth_type": "customer",
-            "password_hash": "Cust123!"
+            "password_hash": "Cust123!",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Linda",
             "last_name": "Harris",
             "email": "lindaharris@example.com",
             "auth_type": "customer",
-            "password_hash": "Cust123!"
+            "password_hash": "Cust123!",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Michael",
             "last_name": "Martin",
             "email": "michaelmartin@example.com",
             "auth_type": "customer",
-            "password_hash": "Cust123!"
+            "password_hash": "Cust123!",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         },
         {
             "first_name": "Sarah",
             "last_name": "Garcia",
             "email": "sarahgarcia@example.com",
             "auth_type": "customer",
-            "password_hash": "Cust123!"
+            "password_hash": "Cust123!",
+            "latitude": generate_geolocation()[0],
+            "longitude": generate_geolocation()[1]
         }
     ]
 }
@@ -137,11 +167,11 @@ def seed_api_clients_with_defaults(db_session: Session):
     ]
 
     default_restaurants = [
-        {"name": "Grill House", "address": "123 Main St", "phone": "123-456-7890", "email": "contact@grillhouse.com", "number_of_tables": random.randint(10, 30)},
-        {"name": "Pasta Paradise", "address": "456 Pasta Lane", "phone": "456-789-0123", "email": "info@pastaparadise.com", "number_of_tables": random.randint(10, 30)},
-        {"name": "Sushi World", "address": "789 Sushi Blvd", "phone": "789-012-3456", "email": "contact@sushiworld.com", "number_of_tables": random.randint(10, 30)},
-        {"name": "Taco Land", "address": "101 Taco Way", "phone": "234-567-8901", "email": "hello@tacoland.com", "number_of_tables": random.randint(10, 30)},
-        {"name": "Pizza Central", "address": "321 Pizza Street", "phone": "567-890-1234", "email": "info@pizzacentral.com", "number_of_tables": random.randint(10, 30)}
+        {"name": "Grill House", "address": "123 Main St", "phone": "123-456-7890", "email": "contact@grillhouse.com", "number_of_tables": random.randint(10, 30), "latitude": generate_geolocation()[0],"longitude": generate_geolocation()[1]},
+        {"name": "Pasta Paradise", "address": "456 Pasta Lane", "phone": "456-789-0123", "email": "info@pastaparadise.com", "number_of_tables": random.randint(10, 30), "latitude": generate_geolocation()[0],"longitude": generate_geolocation()[1]},
+        {"name": "Sushi World", "address": "789 Sushi Blvd", "phone": "789-012-3456", "email": "contact@sushiworld.com", "number_of_tables": random.randint(10, 30), "latitude": generate_geolocation()[0],"longitude": generate_geolocation()[1]},
+        {"name": "Taco Land", "address": "101 Taco Way", "phone": "234-567-8901", "email": "hello@tacoland.com", "number_of_tables": random.randint(10, 30), "latitude": generate_geolocation()[0],"longitude": generate_geolocation()[1]},
+        {"name": "Pizza Central", "address": "321 Pizza Street", "phone": "567-890-1234", "email": "info@pizzacentral.com", "number_of_tables": random.randint(10, 30), "latitude": generate_geolocation()[0],"longitude": generate_geolocation()[1]}
     ]
 
     for client_data in default_clients:
