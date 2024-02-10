@@ -11,6 +11,7 @@ from passlib.hash import sha256_crypt
 from ... import models
 from ...utils.general import validate_incoming
 from ...utils.auth import authcheck
+from ...utils.general import haversine
 from ...utils import auth
 bp = Blueprint('restaurant', __name__)
 
@@ -54,3 +55,20 @@ def restaurant(restaurant_id):
 @bp.route('/tables/<int:restaurant_id>/reserve', methods=["POST"])
 def reserve(table_id):
     pass
+
+
+@bp.route('/local', methods=['POST'])
+def local():
+    user_lat = float(request.form.get('latitude'))
+    user_lon = float(request.form.get('longitude'))
+    radius_in_km = 10 * 1.60934  
+
+    nearby_restaurants = []
+    restaurants = models.db.session.query(models.Restaurant).all()
+
+    for restaurant in restaurants:
+        distance = haversine(user_lon, user_lat, restaurant.longitude, restaurant.latitude)
+        if distance <= radius_in_km:
+            nearby_restaurants.append(restaurant.serialize()) 
+
+    return jsonify(success=True, data=nearby_restaurants)
