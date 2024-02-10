@@ -54,11 +54,15 @@ class Restaurant(db.Model):
     def serialize(self, *args, **kwargs):
         serialized = {
             'owner_id': self.owner_id,
+            'restaurant_id':self.restaurant_id,
             'address': self.address,
             'phone': self.phone,
             'email': self.email,
             'website': self.website,
             'number_of_tables': self.number_of_tables,
+            'name':self.name,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
         }
         return serialized
 
