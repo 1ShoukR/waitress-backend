@@ -37,7 +37,7 @@ def create():
 
 
 
-@bp.route('/<int:restaurant_id/get', methods=["POST"])
+@bp.route('/<int:restaurant_id>/get', methods=["POST"])
 @bp.route('/get', methods=["GET"])
 # FUTUREUS
 # We need to get the geolocation of a user
