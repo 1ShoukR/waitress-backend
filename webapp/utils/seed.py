@@ -27,7 +27,7 @@ def seed_api_clients_with_defaults(db_session: Session):
             "public_uid": "mobile",
             "secret": "JM143w-tGYzStrNE8H4PN7hO67qGHVZJ",
             "previous_secret": None,
-            "client_type": "ios",
+            "client_type": "iOS",
             "name": "waitress-mobile-ios"
         },
         {
@@ -36,7 +36,7 @@ def seed_api_clients_with_defaults(db_session: Session):
             "public_uid": "mobile",
             "secret": 'b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"',
             "previous_secret": None,
-            "client_type": "android",
+            "client_type": "Android",
             "name": "waitress-mobile-android"
         }
     ]
