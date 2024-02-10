@@ -36,6 +36,8 @@ class User(Entity):
     password_hash = sa.Column(sa.String(255), nullable=False)
     access_revoked = sa.Column(sa.Boolean, default=None)
     auth_type = sa.Column(sa.String(50))
+    latitude:float = sa.Column(sa.Float)
+    longitude:float = sa.Column(sa.Float)
 
     def serialize(self):
         """Returns a serialized entity of itself"""
