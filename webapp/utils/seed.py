@@ -21,7 +21,16 @@ def seed_api_clients_with_defaults(db_session: Session):
             "public_uid": "mobile",
             "secret": "JM143w-tGYzStrNE8H4PN7hO67qGHVZJ",
             "previous_secret": None,
-            "client_type": "mobile_first_party",
+            "client_type": "ios",
+            "name": "waitress-mobile-frontend"
+        }
+        {
+            "access_revoked": None, 
+            "last_secret_rotation": None,
+            "public_uid": "mobile",
+            "secret": "JM143w-tGYzStrNE8H4PN7hO67qGHVZJ",
+            "previous_secret": None,
+            "client_type": "android",
             "name": "waitress-mobile-frontend"
         }
     ]
