@@ -16,11 +16,6 @@ func (s *Server) RegisterRoutes() http.Handler {
   
 	r.GET("/health", s.healthHandler)
 	r.GET("/restaurants", restaurantHandlers.TestHandler)
-  
-  
-
-  
-
 	return r
 }
 
