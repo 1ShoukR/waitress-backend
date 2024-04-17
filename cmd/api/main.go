@@ -6,10 +6,9 @@ import (
 )
 
 func main() {
+	serverInstance := server.NewServer() // Renamed to avoid shadowing the package name
 
-	server := server.NewServer()
-
-	err := server.ListenAndServe()
+	err := serverInstance.ListenAndServe()
 	if err != nil {
 		panic(fmt.Sprintf("cannot start server: %s", err))
 	}
