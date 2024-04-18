@@ -4,32 +4,38 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"log"
 	"strconv"
 	"time"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/gin-gonic/gin"
 
-	"waitress-backend/internal/database"
 	"waitress-backend/internal/server/routes"
 )
 
 type Server struct {
 	port   int
-	db     database.Service
+	db     *gorm.DB
 	router *gin.Engine // Add the Gin Engine to the Server struct
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
 	newServer := &Server{
 		port:   port,
-		db:     database.New(),
+		db:     db,
 		router: gin.Default(), // Initialize the Gin Engine here
 	}
 
 	// Setup route groups
-	routes.UserRoutes(newServer.router)
+	routes.UserRoutes(newServer.router, db)
 	// routes.ProductRoutes(newServer.router)
 	// ... include other route groups as needed
 
