@@ -28,7 +28,9 @@ func (s *Server) HelloWorldHandler(c *gin.Context) {
 
 
 func (s *Server) healthHandler(c *gin.Context) {
-	c.JSON(http.StatusOK, s.db.Health())
+	resp := make(map[string]string)
+	resp["status"] = "ok"
+	c.JSON(http.StatusOK, resp)
 }
 
 
