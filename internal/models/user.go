@@ -7,7 +7,7 @@ import (
 
 // Entity is the base class for a person. Each person can be a user or staff.
 type Entity struct {
-	ID        uint `gorm:"primaryKey"`
+	EntityID        uint `gorm:"primaryKey"`
 	FirstName string `gorm:"size:255;not null"`
 	LastName  string `gorm:"size:255;not null"`
 
@@ -21,7 +21,7 @@ type Entity struct {
 
 // User represents a user of the application, inheriting from Entity.
 type User struct {
-	EntityID uint `gorm:"primaryKey;autoIncrement:false"`
+	UserID uint `gorm:"primaryKey;autoIncrement:false"`
 	Entity   Entity `gorm:"foreignKey:EntityID"`
 
 	Email          string `gorm:"size:255;not null"`
