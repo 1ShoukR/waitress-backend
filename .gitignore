@@ -5,3 +5,4 @@ webapp/api/__pycache__/
 webapp/models/__pycache__
 webapp/util/__pycache__/
 docs/build/
+.env
