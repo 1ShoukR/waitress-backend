@@ -3,10 +3,18 @@ module waitress-backend
 go 1.22.2
 
 require (
+	github.com/gin-contrib/sessions v1.0.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/joho/godotenv v1.5.1
 	gorm.io/gorm v1.25.9
+)
+
+require (
+	github.com/gorilla/context v1.1.2 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gorilla/sessions v1.2.2 // indirect
+	github.com/wader/gormstore/v2 v2.0.3 // indirect
 )
 
 require (
