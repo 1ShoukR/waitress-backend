@@ -38,6 +38,18 @@ func (User) TableName() string {
 	return "user"
 }
 
+// Practice method that uses a pointer to manipulate a username in the database based on a User instance
+func (*User) ModifyUserName(db *gorm.DB, id uint, name string) error {
+	user := new(User)
+	if err := db.Where("user_id = ?", id).First(user).Error; err != nil {
+		return err
+	}
+	user.Entity.FirstName = name
+	if err := db.Save(user).Error; err != nil {
+		return err
+	}
+	return nil
+}
 // Customer is a specialization of User for customers.
 type Customer struct {
 	UserID uint `gorm:"primaryKey;autoIncrement:false"`
