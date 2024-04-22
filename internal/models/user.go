@@ -26,6 +26,7 @@ type User struct {
 
 	Email          string `gorm:"size:255;not null"`
 	PasswordHash   string `gorm:"size:255;not null"`
+	Salt		   string `gorm:"size:255"`
 	AccessRevoked  bool
 	AuthType       string `gorm:"size:50"`
 	Latitude       float64
