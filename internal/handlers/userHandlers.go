@@ -3,15 +3,25 @@ package handlers
 import (
 	"net/http"
 
+	// "waitress-backend/internal/handlers"
+	"waitress-backend/internal/models"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"waitress-backend/internal/models"
 )
 
 
-func CreateUser(c *gin.Context) {
-    response := "Test User Created"
-    c.IndentedJSON(http.StatusOK, response)
+func CreateUser(db *gorm.DB) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        email := c.PostForm("email")
+        password := c.PostForm("password")
+        if email == "" || password == "" {
+            c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid login credentials"})
+            return
+        }
+        // salt := handlers.GenerateSalt(16)
+        // hashedPassword := handlers.HashPassword()
+    }
     // logic to create a new user
 }
 
