@@ -10,7 +10,7 @@ import (
 func UserRoutes(router *gin.Engine, db *gorm.DB) {
     user := router.Group("/users")
     {
-        user.GET("/create", handlers.CreateUser)
+        user.GET("/create", handlers.CreateUser(db))
         user.POST("/get", handlers.GetUser(db))
         // user.POST("/", handlers.CreateUser)
         // user.GET("/:id", handlers.GetUser)
