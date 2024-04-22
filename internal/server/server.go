@@ -2,18 +2,21 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
-	"log"
 	"strconv"
 	"time"
+	"waitress-backend/internal/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-
-	_ "github.com/joho/godotenv/autoload"
-	"github.com/gin-gonic/gin"
-
+	gormsessions "github.com/gin-contrib/sessions/gorm"
 	"waitress-backend/internal/server/routes"
+
+	"github.com/gin-contrib/sessions"
+	// "github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 type Server struct {
@@ -28,14 +31,19 @@ func NewServer() *http.Server {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
+	store := gormsessions.NewStore(db, true, []byte(os.Getenv("SESSION_SECRET")))
+	fmt.Printf("Store session: %v", store)
+	router := gin.Default()
+	router.Use(sessions.Sessions("mysession", store))
 	newServer := &Server{
 		port:   port,
 		db:     db,
-		router: gin.Default(), // Initialize the Gin Engine here
+		router: router, // Initialize the Gin Engine here
 	}
 
 	// Setup route groups
 	routes.UserRoutes(newServer.router, db)
+	routes.AuthRoutes(newServer.router, db)
 	// routes.ProductRoutes(newServer.router)
 	// ... include other route groups as needed
 
@@ -47,6 +55,7 @@ func NewServer() *http.Server {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
+	db.AutoMigrate(&models.User{})
 
 	return server
 }
