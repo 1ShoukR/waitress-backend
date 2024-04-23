@@ -29,7 +29,7 @@ type Restaurant struct {
 	Website         *string         // Pointer to allow nil (nullable)
 	NumberOfTables  *int            // Pointer to allow nil (nullable)
 	Latitude        *float64        // Pointer to allow nil (nullable)
-	Longitude       *float64        // Pointer to allow nil (nullable)
+	Longitude       *float64        // Pointer to allow nil (nullable) /* later we need to change this to not nullable */
 	Receipts        []Receipt       `gorm:"foreignKey:RestaurantID"`
 	Reservations    []Reservation   `gorm:"foreignKey:RestaurantID"`
 	Owner           User            `gorm:"foreignKey:OwnerID"`
