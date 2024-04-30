@@ -15,6 +15,16 @@ import (
 	"waitress-backend/internal/utilities"
 )
 
+func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Contect) {
+		// Here, we will query for a restaurant based 
+		// On the owner/admin. Using a discriminator,
+		// We can control what the flow of this func
+		// looks like. For example, we can edit the tables,
+		// menu, employees, available tables? etc. 
+	}
+}
+
 func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Create a new restaurant
@@ -38,6 +48,8 @@ func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			Lat: restaurantLat,
 			Long: restaurantLong,
 		}
+		//TODO: Finish CreateRestaurant route
+		fmt.Printf("%+v\n", newRestaurant)
 		result := db.Create(&newRestaurant)
 	}
 }
