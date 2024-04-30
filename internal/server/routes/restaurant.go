@@ -7,9 +7,10 @@ import (
 )
 
 
-func RestaurantRoutes (router *gin.Engine, db *gorm.DB) {
+func RestaurantRoutes(router *gin.Engine, db *gorm.DB) {
 	restaurantRoutes := router.Group("api/restaurant")
 	{
-		restaurantRoutes.POST("/create", handlers.CreateRestaurant(db))
+		restaurantRoutes.POST("/create", handlers.CreateRestaurant(db, router))
+		restaurantRoutes.POST("/edit", handlers.EditRestaurant(db, router))
 	}
 } 
