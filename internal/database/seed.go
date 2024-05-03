@@ -47,20 +47,42 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		ClientType			string
 		Name				string
 	}{
-		{nil, nil, "web", "RVu0EmNxEfXkhLjEW8lhrpKAnF7MtbCG", nil, "web_first_party", "waitress-web-frontend",},
-		{nil, nil, "mobile", "JM143w-tGYzStrNE8H4PN7hO67qGHVZJ", nil, "iOS", "waitress-mobile-ios",},
+		{nil, nil, "web", `b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"`, nil, "web_first_party", "waitress-web-frontend",},
+		{nil, nil, "mobile", `b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"`, nil, "iOS", "waitress-mobile-ios",},
 		{nil,  nil, "mobile", `b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"`, nil, "Android", "waitress-mobile-android",},
 	}
-	usersData := []struct {
-		FirstName    string
-		LastName     string
-		Email        string
-		Password     string
-		AuthType     string
-	}{
-		{"John", "Doe", "johndoe@example.com", "securePassword123", "admin"},
-		{"Jane", "Smith", "janesmith@example.com", "anotherSecurePassword123", "user"},
-		{"admin_super", "admin_super", "admin@example.com", "superAdminPassword123", "admin_super"},
+	users := []struct {
+		FirstName string
+		LastName  string
+		Email     string
+		Password  string
+		AuthType  string
+		}{
+		// Developer
+		{"Rahmin", "Shoukoohi", "rahminshoukoohi+dev@gmail.com", "Test123!", "dev"},
+		// Restaurant Owners
+		{"Rahmin", "Shoukoohi", "rahminshoukoohi@gmail.com", "Test123!", "admin_super"},
+		{"Jane", "Smith", "janesmith@example.com", "Test123!", "admin_super",},
+		{"Alice", "Johnson", "alicejohnson@example.com", "Test123!", "admin_super",},
+		{"Bob", "Brown", "bobbrown@example.com", "Test123!", "admin_super",},
+		{"Carol", "Davis", "caroldavis@example.com", "Test123!", "admin_super",},
+		{"David", "Wilson", "davidwilson@example.com", "Test123!", "admin_super",},
+		{"Eve", "Miller", "evemiller@example.com", "Test123!", "admin_super",},
+		// Staff Members
+		{"Miles", "Bennett", "milesbennett2024@example.com", "Test123!", "staff"},
+		{"Olivia", "Greenwood", "oliviagreenwood2024@example.com", "Test123!", "staff"},
+		{"Nathan", "Frost", "nathanfrost2024@example.com", "Test123!", "staff"},
+		{"Ella", "Hunt", "ellahunt2024@example.com", "Test123!", "staff"},
+		{"Lucas", "Wright", "lucaswright2024@example.com", "Test123!", "staff"},
+		{"Maya", "Spencer", "mayaspencer2024@example.com", "Test123!", "staff"},
+		{"Leo", "Nicholson", "leonicholson2024@example.com", "Test123!", "staff"},
+		// Customers
+		{"Emily", "Taylor", "emilytaylor@example.com", "Test123!", "customer",},
+		{"James", "Anderson", "jamesanderson@example.com", "Test123!", "customer",},
+		{"Linda", "Harris", "lindaharris@example.com", "Test123!", "customer",},
+		{"Michael", "Martin", "michaelmartin@example.com", "Test123!", "customer",},
+		{"Sarah", "Garcia", "sarahgarcia@example.com", "Test123!", "customer",},
+		{"Bahad", "Badiya", "BahadBadiya@example.com", "Test123!", "customer",},
 	}
 	restaurantData := []struct {
 		Name 			string
@@ -68,37 +90,19 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		Phone			string
 		Email 			string
 		NumOfTables 	int
+		OwnerEmail   string
 	}{
-        {"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10,},
-        {"Pasta Paradise", "456 Pasta Lane", "456-789-0123", "info@pastaparadise.com", rand.Intn(91) + 10,},
-        {"Sushi World", "789 Sushi Blvd", "789-012-3456", "contact@sushiworld.com", rand.Intn(91) + 10,},
-        {"Taco Land", "101 Taco Way", "234-567-8901", "hello@tacoland.com", rand.Intn(91) + 10,},
-        {"Pizza Central", "321 Pizza Street", "567-890-1234", "info@pizzacentral.com", rand.Intn(91) + 10,},
+        {"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com"},
+        {"Pasta Paradise", "456 Pasta Lane", "456-789-0123", "info@pastaparadise.com", rand.Intn(91) + 10, "janesmith@example.com"},
+        {"Sushi World", "789 Sushi Blvd", "789-012-3456", "contact@sushiworld.com", rand.Intn(91) + 10, "alicejohnson@example.com"},
+        {"Taco Land", "101 Taco Way", "234-567-8901", "hello@tacoland.com", rand.Intn(91) + 10, "bobbrown@example.com"},
+        {"Pizza Central", "321 Pizza Street", "567-890-1234", "info@pizzacentral.com", rand.Intn(91) + 10, "caroldavis@example.com"},
+        {"Chicken Central", "321 Chicken Street", "123-323-1234", "info@chickencentral.com", rand.Intn(91) + 10, "davidwilson@example.com"},
+        {"Panda Express", "321 Panda Street", "664-353-1234", "info@pandaexpress.com", rand.Intn(91) + 10, "evemiller@example.com"},
 	}
-
-	for _, data := range defaultClients {
-		client := models.APIClient{
-			AccessRevoked: data.AccessRevoked,
-			LastSecretRotation: data.LastSecretRotation,
-			ClientType: data.ClientType,
-			Name: data.Name,
-			PreviousSecret: data.PreviousSecret,
-			PublicUID: data.PublicUID,
-			Secret: data.Secret,
-		}
-	}
+	emailToUserID := make(map[string]uint)
 	
-	for _, data := range restaurantData {
-		restaurant := models.Restaurant{
-			Name: data.Name,
-			Address: data.Address,
-			Phone: data.Phone,
-			Email: data.Email,
-			NumberOfTables: &data.NumOfTables,
-		}
-	}
-
-	for _, data := range usersData {
+	for _, data := range users {
 		// Generate salt for each user
 		salt, err := utilities.GenerateSalt(16)  // Adjust the salt size as needed
 		if err != nil {
@@ -125,7 +129,39 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		if err := db.Create(&user).Error; err != nil {
 			return err
 		}
+		db.Last(&user)
+		emailToUserID[data.Email] = user.UserID
 	}
+	for _, data := range defaultClients {
+		client := models.APIClient{
+			AccessRevoked: data.AccessRevoked,
+			LastSecretRotation: data.LastSecretRotation,
+			ClientType: data.ClientType,
+			Name: data.Name,
+			PreviousSecret: data.PreviousSecret,
+			PublicUID: data.PublicUID,
+			Secret: data.Secret,
+		}
+		if err := db.Create(&client).Error; err != nil {
+			return err
+		}
+	}
+	
+	for _, data := range restaurantData {
+		ownerID := emailToUserID[data.OwnerEmail] // Get the owner ID from the map
+		restaurant := models.Restaurant{
+			OwnerID: ownerID,
+			Name: data.Name,
+			Address: data.Address,
+			Phone: data.Phone,
+			Email: data.Email,
+			NumberOfTables: &data.NumOfTables,
+		}
+		if err := db.Create(&restaurant).Error; err != nil {
+			return err
+		}
+	}
+
 
 	return nil
 }
