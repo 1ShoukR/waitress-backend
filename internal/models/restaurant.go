@@ -17,7 +17,7 @@ type Receipt struct {
 
 // Restaurant represents a restaurant record in the database.
 type Restaurant struct {
-    gorm.Model
+    RestaurantId    uint            `gorm:"primaryKey;autoIncrement:true"`
     OwnerID         uint            `gorm:"not null"`
     Name            string          `gorm:"size:255;not null"`
     Address         string          `gorm:"size:255;not null"`
@@ -34,21 +34,21 @@ type Restaurant struct {
 
 // Reservation represents a reservation record in the database.
 type Reservation struct {
-    gorm.Model
-    ReservationID           uint            `gorm:"primaryKey"`
-    RestaurantID            uint            `gorm:"not null"`
-    UserID                  uint            `gorm:"not null"` // This field links the reservation to a user
-    TableID                 uint            `gorm:"not null"`
-    Time                    time.Time       `gorm:"not null"`
-	Restaurant     			Restaurant      `gorm:"foreignKey:RestaurantID"`
-
-    // User                    User            `gorm:"foreignKey:UserID"` // GORM uses this for loading the user
+    ReservationID    uint                       `gorm:"primaryKey;autoIncrement:true"`
+    CreatedAt        time.Time
+    UpdatedAt        time.Time
+    DeletedAt        gorm.DeletedAt             `gorm:"index"`
+    RestaurantID     uint                       `gorm:"not null"`
+    UserID           uint                       `gorm:"not null"`
+    TableID          uint                       `gorm:"not null"`
+    Time             time.Time                  `gorm:"not null"`
+    Restaurant       Restaurant                 `gorm:"foreignKey:RestaurantID"`
+    // User            User                     `gorm:"foreignKey:UserID"`
 }
 
 // MenuItem represents a menu item record in the database.
 type MenuItem struct {
-	gorm.Model
-	MenuID         uint            `gorm:"primaryKey"`
+	MenuID         uint            `gorm:"primaryKey;autoIncrement:true"`
 	RestaurantID   uint            `gorm:"not null"`
 	NameOfItem     *string         // Pointer to allow nil (nullable)
 	Price          *float64        // Pointer to allow nil (nullable)
@@ -58,8 +58,7 @@ type MenuItem struct {
 
 // Order represents an order record in the database.
 type Order struct {
-	gorm.Model
-	OrderID        uint            `gorm:"primaryKey"`
+    OrderID        uint            `gorm:"primaryKey;autoIncrement:true"`
 	ReservationID  uint            `gorm:"not null"`
 	UserID         uint            `gorm:"not null"`
 	Total          *float64        // Pointer to allow nil (nullable)
