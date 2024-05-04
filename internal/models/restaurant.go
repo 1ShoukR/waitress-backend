@@ -7,45 +7,42 @@ import (
 
 // Receipt represents a receipt record in the database.
 type Receipt struct {
-	gorm.Model
-	ReceiptID       uint            `gorm:"primaryKey"`
-	TipAmount       *float64        // Pointer to allow nil (nullable)
-	AssignedWaiter  uint            `gorm:"not null"`
-	AssignedUser    uint            `gorm:"not null"`
-	RestaurantID    uint            `gorm:"not null"`
-	Restaurant      Restaurant      `gorm:"foreignKey:RestaurantID"`
-	ReceiptOwner    User            `gorm:"foreignKey:AssignedUser"`
+    gorm.Model
+    TipAmount      *float64        // Pointer to allow nil (nullable)
+    AssignedWaiter uint            `gorm:"not null"`
+    AssignedUser   uint            `gorm:"not null"`
+    RestaurantID   uint            `gorm:"not null"`
+    Restaurant     Restaurant      `gorm:"foreignKey:RestaurantID"`
 }
 
 // Restaurant represents a restaurant record in the database.
 type Restaurant struct {
-	gorm.Model
-	RestaurantID    uint            `gorm:"primaryKey"`
-	OwnerID         uint            `gorm:"not null"`
-	Name            string          `gorm:"size:255;not null"`
-	Address         string          `gorm:"size:255;not null"`
-	Phone           string          `gorm:"size:255;not null"`
-	Email           string          `gorm:"size:255;not null"`
-	Website         *string         // Pointer to allow nil (nullable)
-	NumberOfTables  *int            // Pointer to allow nil (nullable)
-	Latitude        *float64        // Pointer to allow nil (nullable)
-	Longitude       *float64        // Pointer to allow nil (nullable) /* later we need to change this to not nullable */
-	Receipts        []Receipt       `gorm:"foreignKey:RestaurantID"`
-	Reservations    []Reservation   `gorm:"foreignKey:RestaurantID"`
-	Owner           User            `gorm:"foreignKey:OwnerID"`
+    gorm.Model
+    OwnerID         uint            `gorm:"not null"`
+    Name            string          `gorm:"size:255;not null"`
+    Address         string          `gorm:"size:255;not null"`
+    Phone           string          `gorm:"size:255;not null"`
+    Email           string          `gorm:"size:255;not null"`
+    Website         *string         // Pointer to allow nil (nullable)
+    NumberOfTables  *int            // Pointer to allow nil (nullable)
+    Latitude        *float64        // Pointer to allow nil (nullable)
+    Longitude       *float64        // Pointer to allow nil (nullable)
+    Receipts        []Receipt       `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
+    Reservations    *[]Reservation  `gorm:"foreignKey:RestaurantID"`
+    Owner           User            `gorm:"foreignKey:OwnerID"`
 }
 
 // Reservation represents a reservation record in the database.
 type Reservation struct {
-	gorm.Model
-	ReservationID           uint            `gorm:"primaryKey"`
-	RestaurantID            uint            `gorm:"not null"`
-	UserID                  uint            `gorm:"not null"`
-	TableID                 uint            `gorm:"not null"`
-	Time                    time.Time       `gorm:"not null"`
-	ReservationPhoneNumber  *string         // Pointer to allow nil (nullable)
-	Restaurant              Restaurant      `gorm:"foreignKey:RestaurantID"`
-	Customer                User            `gorm:"foreignKey:UserID"`
+    gorm.Model
+    ReservationID           uint            `gorm:"primaryKey"`
+    RestaurantID            uint            `gorm:"not null"`
+    UserID                  uint            `gorm:"not null"` // This field links the reservation to a user
+    TableID                 uint            `gorm:"not null"`
+    Time                    time.Time       `gorm:"not null"`
+	Restaurant     			Restaurant      `gorm:"foreignKey:RestaurantID"`
+
+    // User                    User            `gorm:"foreignKey:UserID"` // GORM uses this for loading the user
 }
 
 // MenuItem represents a menu item record in the database.
