@@ -12,5 +12,6 @@ func RestaurantRoutes(router *gin.Engine, db *gorm.DB) {
 	{
 		restaurantRoutes.POST("/create", handlers.CreateRestaurant(db, router))
 		restaurantRoutes.POST("/edit", handlers.EditRestaurant(db, router))
+		restaurantRoutes.POST("/reservations/:restaurantId/get", handlers.GetReservations(db, router))
 	}
 } 
