@@ -83,3 +83,17 @@ func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "restaurant created"})
 	}
 }
+
+
+func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// We are going to transform this to be a reservation from 
+		// a restaurant, based on a user. 
+		var reservationList []models.Reservation
+		results := db.Find(&reservationList)
+		if results.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Message": results.Error.Error()})
+		}
+		c.IndentedJSON(http.StatusOK, reservationList)
+	}
+}
