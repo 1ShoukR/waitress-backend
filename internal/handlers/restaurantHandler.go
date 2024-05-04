@@ -88,7 +88,9 @@ func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// We are going to transform this to be a reservation from 
-		// a restaurant, based on a user. 
+		// a restaurant, based on a user.
+		reservationId := c.Param("restaurantId")
+		fmt.Printf("Reservation ID: %s\n", reservationId)
 		var reservationList []models.Reservation
 		results := db.Find(&reservationList)
 		if results.Error != nil {
