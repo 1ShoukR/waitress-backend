@@ -7,30 +7,26 @@ import (
 
 // Entity is the base class for a person. Each person can be a user or staff.
 type Entity struct {
-	EntityID        uint `gorm:"primaryKey"`
-	FirstName string `gorm:"size:255;not null"`
-	LastName  string `gorm:"size:255;not null"`
-
-	// The type field is a discriminator column used for polymorphic inheritance.
-	Type string `gorm:"size:50"`
-
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+    EntityID    uint           `gorm:"primaryKey;autoIncrement"`
+    FirstName   string         `gorm:"size:255;not null"`
+    LastName    string         `gorm:"size:255;not null"`
+    Type        string         `gorm:"size:50"`
+    CreatedAt   time.Time
+    UpdatedAt   time.Time
+    DeletedAt   gorm.DeletedAt `gorm:"index"`
 }
 
-// User represents a user of the application, inheriting from Entity.
 type User struct {
-	UserID uint `gorm:"primaryKey;autoIncrement:false"`
-	Entity   Entity `gorm:"foreignKey:EntityID"`
-
-	Email          string `gorm:"size:255;not null"`
-	PasswordHash   string `gorm:"size:255;not null"`
-	Salt		   string `gorm:"size:255"`
-	AccessRevoked  bool
-	AuthType       string `gorm:"size:50"`
-	Latitude       float64
-	Longitude      float64
+    UserID       uint           `gorm:"primaryKey;autoIncrement"`
+    Entity       Entity         `gorm:"foreignKey:EntityID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+    Email        string         `gorm:"size:255;not null;unique"`
+    PasswordHash string         `gorm:"size:255;not null"`
+    Salt         string         `gorm:"size:255"`
+    AccessRevoked bool
+    AuthType     string         `gorm:"size:50"`
+    Latitude     float64
+    Longitude    float64
+    Reservations []Reservation  `gorm:"foreignKey:UserID"`
 }
 
 // GORM requires only the non-embedded fields for the model's actual mapping.
