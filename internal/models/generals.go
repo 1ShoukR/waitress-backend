@@ -14,7 +14,7 @@ type APIClient struct {
 	AccessRevoked     *time.Time // Pointer to allow nil (nullable)
 	LastSecretRotation *time.Time // Pointer to allow nil (nullable)
 	PublicUID         string     `gorm:"size:8"`
-	Secret            string     `gorm:"size:32;unique"`
+	Secret            string     `gorm:"size:256"`
 	PreviousSecret    *string    // Pointer to allow nil (nullable)
 	ClientType        string     `gorm:"size:32"`
 	Name              string     `gorm:"size:32"`
