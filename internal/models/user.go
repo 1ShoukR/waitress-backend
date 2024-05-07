@@ -21,7 +21,7 @@ type User struct {
     Entity       Entity         `gorm:"foreignKey:EntityID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
     Email        string         `gorm:"size:255;not null;unique"`
     PasswordHash string         `gorm:"size:255;not null"`
-    Salt         string         `gorm:"size:255"`
+    // Salt         string         `gorm:"size:255"`
     AccessRevoked bool
     AuthType     string         `gorm:"size:50"`
     Latitude     float64
