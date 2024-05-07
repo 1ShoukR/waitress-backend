@@ -8,7 +8,6 @@ import (
 	"time"
 	"waitress-backend/internal/models"
 	"waitress-backend/internal/utilities"
-
 	"gorm.io/gorm"
 )
 
@@ -112,27 +111,26 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
     emailToUserID := make(map[string]uint)
     
     for _, data := range users {
-        // Generate salt for each user
-        salt, err := utilities.GenerateSalt(16)  
+        // Hash the password with bcrypt
+        hashedPassword, err := utilities.HashPassword(data.Password)
         if err != nil {
-            return err
+            return err // or handle error appropriately
         }
-        // Hash the password with the generated salt
-        hashedPassword := utilities.HashPassword(data.Password, salt)
+        
         lat, long := generateGeolocation(40.730610, -73.935242, 0.01)
         
-		user := models.User{
-			Entity: models.Entity{
-				FirstName: data.FirstName,
-				LastName:  data.LastName,
-				Type:      data.AuthType,
-			},
-			Email:        data.Email,
-			PasswordHash: hashedPassword,
-			AuthType:     data.AuthType,
-			Latitude:     lat,
-			Longitude:    long,
-		}
+        user := models.User{
+            Entity: models.Entity{
+                FirstName: data.FirstName,
+                LastName:  data.LastName,
+                Type:      data.AuthType,
+            },
+            Email:        data.Email,
+            PasswordHash: hashedPassword, // store the hashed password as a string
+            AuthType:     data.AuthType,
+            Latitude:     lat,
+            Longitude:    long,
+        }
 
 		result := db.Create(&user)
 		if result.Error != nil {
