@@ -8,7 +8,7 @@ import (
 
 
 func UtilitiesRoutes(router *gin.Engine, db *gorm.DB) {
-	database := router.Group("api/database")
+	database := router.Group("api/db")
 	{
 		database.GET("/seed", handlers.Seed(db))
 		database.GET("/run-all", handlers.RunAll(db))
