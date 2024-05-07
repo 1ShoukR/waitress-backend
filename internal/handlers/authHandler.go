@@ -12,7 +12,6 @@ import (
 	"waitress-backend/internal/models"
 
 	"waitress-backend/internal/utilities"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -56,6 +55,10 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
     return func(c *gin.Context) {
         email := c.PostForm("email")
         password := c.PostForm("password")
+        userAgent := c.PostForm("userAgent")
+        var client models.APIClient
+        userClient := db.Find(&client, "client_type = ?", userAgent)
+        fmt.Println(userClient)
         if email == "" {
             c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "The email and/or password is incorrect"})
             return
@@ -73,24 +76,29 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
         }
 
         // Assume foundUser.Salt and foundUser.PasswordHash store the salt and hashed password
-        if !utilities.VerifyPassword(foundUser.PasswordHash, password, []byte(foundUser.Salt)) {
+        if !utilities.CheckPasswordHash(password, foundUser.PasswordHash, ) {
             c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Invalid login credentials"})
             return
         }
-
+        token, err := createToken((foundUser.Email))
+        if err != nil {
+            c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating token"})
+            return
+        }
         // If the password is correct, proceed with session handling
         session := sessions.Default(c)
-        var count int
-        v := session.Get("Count")
-        if v == nil {
-            count = 0
-        } else {
-            count = v.(int) + 1
-        }
-        session.Set("Count", count)
+        session.Set("userID", foundUser.UserID)
+        session.Set("apiToken", token)
+        session.Set("authType", foundUser.AuthType)
+        session.Set("loggedIn", true)
         session.Save()
 
-        c.IndentedJSON(http.StatusOK, gin.H{"Message": "Login successful", "Count": count})
+        c.IndentedJSON(http.StatusOK, gin.H{
+            "Message": "Login successful", 
+            "user": foundUser, 
+            "token": token,
+            "client": userClient,
+        })
     }
 }
 
