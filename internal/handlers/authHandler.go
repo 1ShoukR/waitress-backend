@@ -65,7 +65,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
         }
 
         var foundUser models.User
-        result := db.Where("email = ?", email).First(&foundUser)
+        result := db.Preload("Entity").Where("email = ?", email).First(&foundUser)
         if result.Error != nil {
             if errors.Is(result.Error, gorm.ErrRecordNotFound) {
                 c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
@@ -92,12 +92,29 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
         session.Set("authType", foundUser.AuthType)
         session.Set("loggedIn", true)
         session.Save()
+        type CustomUserResponse struct {
+            UserID       uint    `json:"userId"`
+            FirstName    string  `json:"firstName"`
+            LastName     string  `json:"lastName"`
+            Email        string  `json:"email"`
+            AuthType     string  `json:"authType"`
+            Latitude     float64 `json:"latitude"`
+            Longitude    float64 `json:"longitude"`
+        }
+
+        response := CustomUserResponse{
+            UserID:       foundUser.UserID,
+            FirstName:    foundUser.Entity.FirstName,
+            LastName:     foundUser.Entity.LastName,
+            Email:        foundUser.Email,
+            AuthType:     foundUser.AuthType,
+            Latitude:     foundUser.Latitude,
+            Longitude:    foundUser.Longitude,
+        }
 
         c.IndentedJSON(http.StatusOK, gin.H{
-            "Message": "Login successful", 
-            "user": foundUser, 
+            "user": response,
             "token": token,
-            "client": userClient,
         })
     }
 }
