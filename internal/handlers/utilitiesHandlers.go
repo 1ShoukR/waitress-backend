@@ -48,6 +48,11 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Reservation table: %v", err)})
 			return
 		}
+		// Migrate the Table table
+		if err := db.AutoMigrate(&models.Table{}); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Table table: %v", err)})
+			return
+		}
 		// Migrate the Receipt table
 		if err := db.AutoMigrate(&models.Receipt{}); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Receipt table: %v", err)})
@@ -61,7 +66,7 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 
 func RunAll(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err := db.AutoMigrate(&models.Entity{}, &models.User{}, &models.APIClient{}, &models.Restaurant{}, &models.Reservation{}, &models.Receipt{}); err != nil {
+		if err := db.AutoMigrate(&models.Entity{}, &models.User{}, &models.APIClient{}, &models.Restaurant{}, &models.Reservation{}, &models.Table{},&models.Receipt{}); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate all tables: %v", err)})
 			return
 		}

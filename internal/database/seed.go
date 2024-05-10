@@ -8,6 +8,7 @@ import (
 	"time"
 	"waitress-backend/internal/models"
 	"waitress-backend/internal/utilities"
+
 	"gorm.io/gorm"
 )
 
@@ -50,6 +51,9 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
         {UserID: 2, RestaurantID: 2, TableID: 2, Time: time.Now().Add(24 * time.Hour)}, // next day
         {UserID: 3, RestaurantID: 3, TableID: 3, Time: time.Now().Add(48 * time.Hour)}, // in two days
     }
+    tables := []struct {
+        
+    }{}
     defaultClients := []struct {
         AccessRevoked       *time.Time
         LastSecretRotation  *time.Time
