@@ -39,6 +39,16 @@ func (gs *GenericSeeder) Seed(db *gorm.DB) error {
 type UserSeeder struct{}
 
 func (us *UserSeeder) Seed(db *gorm.DB) error {
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	if err := tx.Error; err != nil {
+		return err
+	}
+
     // Define the users with their passwords
     reservations := []struct {
         UserID      uint
@@ -51,9 +61,17 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
         {UserID: 2, RestaurantID: 2, TableID: 2, Time: time.Now().Add(24 * time.Hour)}, // next day
         {UserID: 3, RestaurantID: 3, TableID: 3, Time: time.Now().Add(48 * time.Hour)}, // in two days
     }
-    tables := []struct {
-        
-    }{}
+	tables := []struct {
+		RestaurantID  uint
+		ReservationID uint
+		TableNumber   uint
+		Capacity      uint
+		IsReserved    bool
+	}{
+		{RestaurantID: 1, ReservationID: 1, TableNumber: 1, Capacity: 4, IsReserved: true},
+		{RestaurantID: 2, ReservationID: 2, TableNumber: 2, Capacity: 4, IsReserved: true},
+		{RestaurantID: 3, ReservationID: 3, TableNumber: 3, Capacity: 4, IsReserved: true},
+	}
     defaultClients := []struct {
         AccessRevoked       *time.Time
         LastSecretRotation  *time.Time
@@ -136,10 +154,9 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
             Longitude:    long,
         }
 
-		result := db.Create(&user)
-		if result.Error != nil {
-			log.Printf("Error creating user with email %s: %v", data.Email, result.Error)
-			return result.Error
+		if err := tx.Create(&user).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to create user with email %s: %v", data.Email, err)
 		}
 		log.Printf("After creation, user object: %+v", user)
 		if user.UserID == 0 {
@@ -179,10 +196,31 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
             Email: data.Email,
             NumberOfTables: &data.NumOfTables,
         }
-        if err := db.Create(&restaurant).Error; err != nil {
-            return err
+        if err := tx.Create(&restaurant).Error; err != nil {
+            tx.Rollback()
+            return fmt.Errorf("failed to create restaurant with email %s: %v", data.Email, err)
         }
     }
+    for _, data := range tables {
+        var restaurant models.Restaurant
+        if err := tx.Where("restaurant_id = ?", data.RestaurantID).First(&restaurant).Error; err != nil {
+            tx.Rollback()
+            return fmt.Errorf("failed to find restaurant with ID %d: %v", data.RestaurantID, err)
+        }
+
+        table := models.Table{
+            RestaurantID: data.RestaurantID,
+            TableNumber:  data.TableNumber,
+            Capacity:     data.Capacity,
+            IsReserved:   data.IsReserved,
+        }
+        if err := tx.Create(&table).Error; err != nil {
+            tx.Rollback()
+            return fmt.Errorf("failed to create table for restaurant %d: %v", data.RestaurantID, err)
+        }
+        data.ReservationID = table.TableID
+    }
+
     for _, r := range reservations {
         reservation := models.Reservation{
             UserID:       r.UserID,
@@ -190,12 +228,19 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
             TableID:      r.TableID,
             Time:         r.Time,
         }
-        if err := db.Create(&reservation).Error; err != nil {
-            log.Printf("Failed to create reservation for user %d at restaurant %d: %v", r.UserID, r.RestaurantID, err)
-            return err
+        if err := tx.Create(&reservation).Error; err != nil {
+            tx.Rollback()
+            return fmt.Errorf("failed to create reservation for user %d at restaurant %d: %v", r.UserID, r.RestaurantID, err)
+        }
+
+        if err := tx.Model(&models.Table{}).Where("table_id = ?", r.TableID).Update("reservation_id", reservation.ReservationID).Error; err != nil {
+            tx.Rollback()
+            return fmt.Errorf("failed to link table %d with reservation %d: %v", r.TableID, reservation.ReservationID, err)
         }
     }
-
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
 
     return nil
 }
