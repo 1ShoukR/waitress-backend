@@ -100,6 +100,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
             AuthType     string  `json:"authType"`
             Latitude     float64 `json:"latitude"`
             Longitude    float64 `json:"longitude"`
+            CreatedAt    time.Time `json:"createdAt"`
         }
 
         response := CustomUserResponse{
@@ -110,6 +111,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
             AuthType:     foundUser.AuthType,
             Latitude:     foundUser.Latitude,
             Longitude:    foundUser.Longitude,
+            CreatedAt:    foundUser.Entity.CreatedAt,
         }
 
         c.IndentedJSON(http.StatusOK, gin.H{
