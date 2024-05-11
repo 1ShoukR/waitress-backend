@@ -27,6 +27,7 @@ type User struct {
     Latitude     float64
     Longitude    float64
 	Address 	 *string
+	ProfileImage *string
     Reservations []Reservation  `gorm:"foreignKey:UserID"`
 }
 
