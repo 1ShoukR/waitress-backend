@@ -39,7 +39,7 @@ func GetUser(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateUserLocation(db *gorm.DB) gin.HandlerFunc {
     return func(c *gin.Context) {
-        // logic to update user location
+        //TODO: logic to update user location
         var foundUser models.User
         userId := c.PostForm("userId")
         if err := db.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
