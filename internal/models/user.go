@@ -26,6 +26,7 @@ type User struct {
     AuthType     string         `gorm:"size:50"`
     Latitude     float64
     Longitude    float64
+	Address 	 *string
     Reservations []Reservation  `gorm:"foreignKey:UserID"`
 }
 
