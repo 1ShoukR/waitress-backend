@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	// "waitress-backend/internal/handlers"
 	"waitress-backend/internal/models"
@@ -39,14 +40,53 @@ func GetUser(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateUserLocation(db *gorm.DB) gin.HandlerFunc {
     return func(c *gin.Context) {
-        //TODO: logic to update user location
+        tx := db.Begin()
+        defer func() {
+            if r := recover(); r != nil {
+                tx.Rollback()
+                c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Internal server error: %v", r)})
+            }
+        }()
+        
         var foundUser models.User
         userId := c.PostForm("userId")
-        if err := db.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
+        address := c.PostForm("address")
+        latitude := c.PostForm("latitude")
+        longitude := c.PostForm("longitude")
+
+        if err := tx.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
+            tx.Rollback()
             c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
             return
         }
-        fmt.Println(foundUser)
+
+        la, err := strconv.ParseFloat(latitude, 64)
+        if err != nil {
+            tx.Rollback()
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid latitude"})
+            return
+        }
+
+        lo, err := strconv.ParseFloat(longitude, 64)
+        if err != nil {
+            tx.Rollback()
+            c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude"})
+            return
+        }
+
+        foundUser.Address = &address
+        foundUser.Latitude = la
+        foundUser.Longitude = lo
+
+        if err := tx.Save(&foundUser).Error; err != nil {
+            tx.Rollback()
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user location"})
+            return
+        }
+
+        tx.Commit()
+        c.JSON(http.StatusOK, gin.H{"message": "User location updated successfully", "user": foundUser})
     }
 }
+
 
