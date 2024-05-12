@@ -1,6 +1,5 @@
 package handlers
 
-
 import (
 	// "log"
 	// "errors"
@@ -8,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"waitress-backend/internal/models"
+	"waitress-backend/internal/utilities"
 
 	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -27,6 +27,27 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 	}
 }
+
+func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var restaurants []models.Restaurant
+		userLat, _ := strconv.ParseFloat(c.Query("latitude"), 64)
+		userLong, _ := strconv.ParseFloat(c.Query("longitude"), 64)
+		maxDistance := 5000.0 // Max distance in meters
+
+		db.Find(&restaurants) // Retrieve all restaurants
+
+		var nearbyRestaurants []models.Restaurant
+		for _, restaurant := range restaurants {
+			if utilities.Haversine(userLat, userLong, *restaurant.Latitude, *restaurant.Longitude) <= maxDistance {
+				nearbyRestaurants = append(nearbyRestaurants, restaurant)
+			}
+		}
+
+		c.JSON(http.StatusOK, gin.H{"restaurants": nearbyRestaurants})
+	}
+}
+
 
 func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
