@@ -40,53 +40,38 @@ func GetUser(db *gorm.DB) gin.HandlerFunc {
 
 func UpdateUserLocation(db *gorm.DB) gin.HandlerFunc {
     return func(c *gin.Context) {
-        tx := db.Begin()
-        defer func() {
-            if r := recover(); r != nil {
-                tx.Rollback()
-                c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("Internal server error: %v", r)})
-            }
-        }()
-        
         var foundUser models.User
         userId := c.PostForm("userId")
         address := c.PostForm("address")
-        latitude := c.PostForm("latitude")
-        longitude := c.PostForm("longitude")
+        latitudeStr := c.PostForm("latitude")
+        longitudeStr := c.PostForm("longitude")
 
-        if err := tx.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
-            return
-        }
-
-        la, err := strconv.ParseFloat(latitude, 64)
+        latitude, err := strconv.ParseFloat(latitudeStr, 64)
         if err != nil {
-            tx.Rollback()
             c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid latitude"})
             return
         }
 
-        lo, err := strconv.ParseFloat(longitude, 64)
+        longitude, err := strconv.ParseFloat(longitudeStr, 64)
         if err != nil {
-            tx.Rollback()
             c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude"})
             return
         }
 
-        foundUser.Address = &address
-        foundUser.Latitude = la
-        foundUser.Longitude = lo
-
-        if err := tx.Save(&foundUser).Error; err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user location"})
+        if err := db.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
             return
         }
 
-        tx.Commit()
+        // Now use the method on the foundUser object
+        if err := foundUser.UpdateLocation(db, latitude, longitude, address); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+            return
+        }
+
         c.JSON(http.StatusOK, gin.H{"message": "User location updated successfully", "user": foundUser})
     }
 }
+
 
 
