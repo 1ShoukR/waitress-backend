@@ -94,28 +94,29 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
         Email     string
         Password  string
         AuthType  string
+        Address   string
     }{
-        {"Rahmin", "Shoukoohi", "rahminshoukoohi+dev@gmail.com", "Test123!", "dev"},
-        {"Rahmin", "Shoukoohi", "rahminshoukoohi@gmail.com", "Test123!", "admin_super"},
-        {"Jane", "Smith", "janesmith@example.com", "Test123!", "admin_super"},
-        {"Alice", "Johnson", "alicejohnson@example.com", "Test123!", "admin_super"},
-        {"Bob", "Brown", "bobbrown@example.com", "Test123!", "admin_super"},
-        {"Carol", "Davis", "caroldavis@example.com", "Test123!", "admin_super"},
-        {"David", "Wilson", "davidwilson@example.com", "Test123!", "admin_super"},
-        {"Eve", "Miller", "evemiller@example.com", "Test123!", "admin_super"},
-        {"Miles", "Bennett", "milesbennett2024@example.com", "Test123!", "staff"},
-        {"Olivia", "Greenwood", "oliviagreenwood2024@example.com", "Test123!", "staff"},
-        {"Nathan", "Frost", "nathanfrost2024@example.com", "Test123!", "staff"},
-        {"Ella", "Hunt", "ellahunt2024@example.com", "Test123!", "staff"},
-        {"Lucas", "Wright", "lucaswright2024@example.com", "Test123!", "staff"},
-        {"Maya", "Spencer", "mayaspencer2024@example.com", "Test123!", "staff"},
-        {"Leo", "Nicholson", "leonicholson2024@example.com", "Test123!", "staff"},
-        {"Emily", "Taylor", "emilytaylor@example.com", "Test123!", "customer"},
-        {"James", "Anderson", "jamesanderson@example.com", "Test123!", "customer"},
-        {"Linda", "Harris", "lindaharris@example.com", "Test123!", "customer"},
-        {"Michael", "Martin", "michaelmartin@example.com", "Test123!", "customer"},
-        {"Sarah", "Garcia", "sarahgarcia@example.com", "Test123!", "customer"},
-        {"Bahad", "Badiya", "BahadBadiya@example.com", "Test123!", "customer"},
+    {"Rahmin", "Shoukoohi", "rahminshoukoohi+dev@gmail.com", "Test123!", "dev", "123 Broadway St, New York, NY 10006"},
+    {"Rahmin", "Shoukoohi", "rahminshoukoohi@gmail.com", "Test123!", "admin_super", "456 Park Ave, New York, NY 10022"},
+    {"Jane", "Smith", "janesmith@example.com", "Test123!", "admin_super", "789 West St, New York, NY 10014"},
+    {"Alice", "Johnson", "alicejohnson@example.com", "Test123!", "admin_super", "321 East St, New York, NY 10028"},
+    {"Bob", "Brown", "bobbrown@example.com", "Test123!", "admin_super", "654 North Rd, New York, NY 10029"},
+    {"Carol", "Davis", "caroldavis@example.com", "Test123!", "admin_super", "987 South Ave, New York, NY 10010"},
+    {"David", "Wilson", "davidwilson@example.com", "Test123!", "admin_super", "159 Riverside Blvd, New York, NY 10069"},
+    {"Eve", "Miller", "evemiller@example.com", "Test123!", "admin_super", "468 Fashion Ave, New York, NY 10123"},
+    {"Miles", "Bennett", "milesbennett2024@example.com", "Test123!", "staff", "274 Bowery, New York, NY 10012"},
+    {"Olivia", "Greenwood", "oliviagreenwood2024@example.com", "Test123!", "staff", "342 Canal St, New York, NY 10013"},
+    {"Nathan", "Frost", "nathanfrost2024@example.com", "Test123!", "staff", "513 W 54th St, New York, NY 10019"},
+    {"Ella", "Hunt", "ellahunt2024@example.com", "Test123!", "staff", "809 Columbus Ave, New York, NY 10025"},
+    {"Lucas", "Wright", "lucaswright2024@example.com", "Test123!", "staff", "206 W 23rd St, New York, NY 10011"},
+    {"Maya", "Spencer", "mayaspencer2024@example.com", "Test123!", "staff", "605 W 48th St, New York, NY 10036"},
+    {"Leo", "Nicholson", "leonicholson2024@example.com", "Test123!", "staff", "190 Mercer St, New York, NY 10012"},
+    {"Emily", "Taylor", "emilytaylor@example.com", "Test123!", "customer", "25 Tudor City Pl, New York, NY 10017"},
+    {"James", "Anderson", "jamesanderson@example.com", "Test123!", "customer", "70 Pine St, New York, NY 10005"},
+    {"Linda", "Harris", "lindaharris@example.com", "Test123!", "customer", "15 Central Park W, New York, NY 10023"},
+    {"Michael", "Martin", "michaelmartin@example.com", "Test123!", "customer", "230 W 55th St, New York, NY 10019"},
+    {"Sarah", "Garcia", "sarahgarcia@example.com", "Test123!", "customer", "400 Chambers St, New York, NY 10282"},
+    {"Bahad", "Badiya", "BahadBadiya@example.com", "Test123!", "customer", "319 E 50th St, New York, NY 10022"},
     }
     restaurantData := []struct {
         Name            string
@@ -157,6 +158,7 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
             AuthType:     data.AuthType,
             Latitude:     lat,
             Longitude:    long,
+            Address:      &data.Address,
         }
 
 		if err := tx.Create(&user).Error; err != nil {
