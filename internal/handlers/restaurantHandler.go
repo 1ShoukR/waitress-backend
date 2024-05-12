@@ -30,18 +30,58 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		//TODO - Make this based off of the user's location
 		var restaurants []models.Restaurant
-		userLat, _ := strconv.ParseFloat(c.Query("latitude"), 64)
-		userLong, _ := strconv.ParseFloat(c.Query("longitude"), 64)
+		userLatStr := c.PostForm("latitude")
+		userLongStr := c.PostForm("longitude")
+		apiToken := c.PostForm("apiToken")
+
+		fmt.Println("Received latitude:", userLatStr)
+		fmt.Println("Received longitude:", userLongStr)
+		fmt.Println("Received apiToken:", apiToken)
+
+		userLat, err := strconv.ParseFloat(userLatStr, 64)
+		if err != nil {
+			fmt.Println("Error parsing latitude:", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid latitude"})
+			return
+		}
+
+		userLong, err := strconv.ParseFloat(userLongStr, 64)
+		if err != nil {
+			fmt.Println("Error parsing longitude:", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude"})
+			return
+		}
+
 		maxDistance := 5000.0 // Max distance in meters
 
-		db.Find(&restaurants) // Retrieve all restaurants
+		// Retrieve all restaurants
+		if err := db.Find(&restaurants).Error; err != nil {
+			fmt.Println("Error retrieving restaurants:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve restaurants"})
+			return
+		}
+
+		if len(restaurants) == 0 {
+			fmt.Println("No restaurants found in database.")
+		} else {
+			fmt.Println("Total restaurants retrieved:", len(restaurants))
+		}
 
 		var nearbyRestaurants []models.Restaurant
+		// Need to figure out how to get the distance between the user and the restaurant
+		// and only return the restaurants that are within the max distance
 		for _, restaurant := range restaurants {
 			if utilities.Haversine(userLat, userLong, *restaurant.Latitude, *restaurant.Longitude) <= maxDistance {
 				nearbyRestaurants = append(nearbyRestaurants, restaurant)
 			}
+		}
+
+		if len(nearbyRestaurants) == 0 {
+			fmt.Println("No nearby restaurants found within", maxDistance, "meters.")
+		} else {
+			fmt.Println("Nearby restaurants found:", len(nearbyRestaurants))
 		}
 
 		c.JSON(http.StatusOK, gin.H{"restaurants": nearbyRestaurants})
