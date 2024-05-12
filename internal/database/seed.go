@@ -13,8 +13,10 @@ import (
 )
 
 func generateGeolocation(baseLat, baseLong, variance float64) (float64, float64) {
-	rand.Seed(time.Now().UnixNano())
-	return baseLat * (rand.Float64()*2*variance - variance), baseLong + (rand.Float64()*2*variance - variance)
+    rand.Seed(time.Now().UnixNano())
+    latVariance := variance / 1000 // Reducing the variance for latitude as Manhattan is not very wide
+    longVariance := variance / 100  // Manhattan is longer than it is wide, so a slightly larger variance can be used for longitude
+    return baseLat + (rand.Float64()*2*latVariance - latVariance), baseLong + (rand.Float64()*2*longVariance - longVariance)
 }
 
 type Seeder interface {
@@ -48,7 +50,8 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 	if err := tx.Error; err != nil {
 		return err
 	}
-
+    baseLat, baseLong := 40.730610, -73.935242 // Central coordinates for Manhattan
+	variance := 0.01
     // Define the users with their passwords
     reservations := []struct {
         UserID      uint
@@ -121,14 +124,16 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
         Email           string
         NumOfTables     int
         OwnerEmail      string
+        Latitude        float64
+        Longitude       float64
     }{
-        {"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com"},
-        {"Pasta Paradise", "456 Pasta Lane", "456-789-0123", "info@pastaparadise.com", rand.Intn(91) + 10, "janesmith@example.com"},
-        {"Sushi World", "789 Sushi Blvd", "789-012-3456", "contact@sushiworld.com", rand.Intn(91) + 10, "alicejohnson@example.com"},
-        {"Taco Land", "101 Taco Way", "234-567-8901", "hello@tacoland.com", rand.Intn(91) + 10, "bobbrown@example.com"},
-        {"Pizza Central", "321 Pizza Street", "567-890-1234", "info@pizzacentral.com", rand.Intn(91) + 10, "caroldavis@example.com"},
-        {"Chicken Central", "321 Chicken Street", "123-323-1234", "info@chickencentral.com", rand.Intn(91) + 10, "davidwilson@example.com"},
-        {"Panda Express", "321 Panda Street", "664-353-1234", "info@pandaexpress.com", rand.Intn(91) + 10, "evemiller@example.com"},
+        {"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", 0, 0},
+        {"Pasta Paradise", "456 Pasta Lane", "456-789-0123", "info@pastaparadise.com", rand.Intn(91) + 10, "janesmith@example.com", 0, 0},
+        {"Sushi World", "789 Sushi Blvd", "789-012-3456", "contact@sushiworld.com", rand.Intn(91) + 10, "alicejohnson@example.com", 0, 0},
+        {"Taco Land", "101 Taco Way", "234-567-8901", "hello@tacoland.com", rand.Intn(91) + 10, "bobbrown@example.com", 0, 0},
+        {"Pizza Central", "321 Pizza Street", "567-890-1234", "info@pizzacentral.com", rand.Intn(91) + 10, "caroldavis@example.com", 0, 0},
+        {"Chicken Central", "321 Chicken Street", "123-323-1234", "info@chickencentral.com", rand.Intn(91) + 10, "davidwilson@example.com", 0, 0},
+        {"Panda Express", "321 Panda Street", "664-353-1234", "info@pandaexpress.com", rand.Intn(91) + 10, "evemiller@example.com", 0, 0},
     }
     emailToUserID := make(map[string]uint)
     
@@ -139,7 +144,7 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
             return err // or handle error appropriately
         }
         
-        lat, long := generateGeolocation(40.730610, -73.935242, 0.01)
+        lat, long := generateGeolocation(baseLat, baseLong, variance)
         
         user := models.User{
             Entity: models.Entity{
@@ -184,6 +189,7 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
     }
     
     for _, data := range restaurantData {
+        lat, long := generateGeolocation(baseLat, baseLong, variance)
         ownerID, exists := emailToUserID[data.OwnerEmail]
         if !exists {
             return fmt.Errorf("no user ID found for email: %s", data.OwnerEmail)
@@ -195,6 +201,8 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
             Phone: data.Phone,
             Email: data.Email,
             NumberOfTables: &data.NumOfTables,
+            Latitude: &lat,
+            Longitude: &long,
         }
         if err := tx.Create(&restaurant).Error; err != nil {
             tx.Rollback()
