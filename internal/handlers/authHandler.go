@@ -100,6 +100,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
             AuthType     string  `json:"authType"`
             Latitude     float64 `json:"latitude"`
             Longitude    float64 `json:"longitude"`
+            Address      *string `json:"address"`
             CreatedAt    time.Time `json:"createdAt"`
         }
 
@@ -110,6 +111,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
             Email:        foundUser.Email,
             AuthType:     foundUser.AuthType,
             Latitude:     foundUser.Latitude,
+            Address:      foundUser.Address,
             Longitude:    foundUser.Longitude,
             CreatedAt:    foundUser.Entity.CreatedAt,
         }
