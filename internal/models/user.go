@@ -1,8 +1,10 @@
 package models
 
 import (
-	"gorm.io/gorm"
+	"fmt"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // Entity is the base class for a person. Each person can be a user or staff.
@@ -35,6 +37,40 @@ type User struct {
 // The embedded fields are automatically included.
 func (User) TableName() string {
 	return "user"
+}
+
+func (u *User) UpdateLocation(db *gorm.DB, latitude, longitude float64, address string) error {
+    // Begin a transaction
+    tx := db.Begin()
+
+    // Always good practice to handle panics in such operations
+    defer func() {
+        if r := recover(); r != nil {
+            tx.Rollback()
+            // Assume returning the error up the stack
+        }
+    }()
+
+    // Try to fetch the user from the database to verify existence
+    if err := tx.Where("user_id = ?", u.UserID).First(&u).Error; err != nil {
+        tx.Rollback()
+        return fmt.Errorf("user not found: %w", err)
+    }
+
+    // Update fields
+    u.Latitude = latitude
+    u.Longitude = longitude
+    u.Address = &address
+
+    // Save the user back to the database
+    if err := tx.Save(u).Error; err != nil {
+        tx.Rollback()
+        return fmt.Errorf("failed to update user location: %w", err)
+    }
+
+    // Commit the transaction
+    tx.Commit()
+    return nil
 }
 
 // Practice method that uses a pointer to manipulate a username in the database based on a User instance
