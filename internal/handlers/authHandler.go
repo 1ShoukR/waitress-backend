@@ -4,6 +4,7 @@ import (
 	// "log"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	// "fmt"
@@ -12,6 +13,7 @@ import (
 	"waitress-backend/internal/models"
 
 	"waitress-backend/internal/utilities"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -49,6 +51,15 @@ func verifyToken(tokenString string) error {
     }
     
     return nil
+}
+
+func Logout(db *gorm.DB) gin.HandlerFunc {
+    return func(c *gin.Context) {
+        session := sessions.Default(c)
+        session.Clear()
+        session.Save()
+        c.JSON(http.StatusOK, gin.H{"message": "Logged out"})
+    }
 }
 
 func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
@@ -90,8 +101,14 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
         session.Set("userID", foundUser.UserID)
         session.Set("apiToken", token)
         session.Set("authType", foundUser.AuthType)
+        session.Set("clientType", userAgent)
+        session.Set("user", foundUser) 
         session.Set("loggedIn", true)
-        session.Save()
+        if err := session.Save(); err != nil {
+            log.Printf("Failed to save session: %v", err)
+            c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error saving session"})
+            return
+        }
         type CustomUserResponse struct {
             UserID       uint    `json:"userId"`
             FirstName    string  `json:"firstName"`
