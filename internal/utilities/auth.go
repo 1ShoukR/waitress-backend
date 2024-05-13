@@ -189,19 +189,19 @@ func UserRequired(authGroups AuthGroups, group, subgroup string) gin.HandlerFunc
         var ok bool
 
         switch group {
-        case "Dev":
-            allowedUsers, ok = authGroups.Dev[subgroup]
-        case "Admin":
-            allowedUsers, ok = authGroups.Admin[subgroup]
-        case "Staff":
-            allowedUsers, ok = authGroups.Staff[subgroup]
-        case "Customer":
-            allowedUsers, ok = authGroups.Customer[subgroup]
-        default:
-            fmt.Println("Invalid user group:", group)
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user group"})
-            c.Abort()
-            return
+            case "Dev":
+                allowedUsers, ok = authGroups.Dev[subgroup]
+            case "Admin":
+                allowedUsers, ok = authGroups.Admin[subgroup]
+            case "Staff":
+                allowedUsers, ok = authGroups.Staff[subgroup]
+            case "Customer":
+                allowedUsers, ok = authGroups.Customer[subgroup]
+            default:
+                fmt.Println("Invalid user group:", group)
+                c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid user group"})
+                c.Abort()
+                return
         }
 
         if !ok {
