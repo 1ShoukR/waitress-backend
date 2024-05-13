@@ -1,12 +1,14 @@
 package server
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+	"waitress-backend/internal/models"
 	"waitress-backend/internal/server/routes"
 
 	gormsessions "github.com/gin-contrib/sessions/gorm"
@@ -37,6 +39,7 @@ func NewServer() *http.Server {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
+	gob.Register(models.User{})
 	store := gormsessions.NewStore(db, true, []byte(os.Getenv("SESSION_SECRET")))
 	fmt.Printf("Store session: %v", store)
 	router := gin.Default()
