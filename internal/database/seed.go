@@ -96,7 +96,7 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
         AuthType  string
         Address   string
     }{
-    {"Rahmin", "Shoukoohi", "rahminshoukoohi+dev@gmail.com", "Test123!", "dev", "123 Broadway St, New York, NY 10006"},
+    {"Engineer", "Developer", "engineer@test.com", "Test123!", "dev", "123 Broadway St, New York, NY 10006"},
     {"Rahmin", "Shoukoohi", "rahminshoukoohi@gmail.com", "Test123!", "admin_super", "456 Park Ave, New York, NY 10022"},
     {"Jane", "Smith", "janesmith@example.com", "Test123!", "admin_super", "789 West St, New York, NY 10014"},
     {"Alice", "Johnson", "alicejohnson@example.com", "Test123!", "admin_super", "321 East St, New York, NY 10028"},
