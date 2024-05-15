@@ -57,6 +57,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		maxDistance := 5000.0 // Max distance in meters
 
 		// Retrieve all restaurants
+		// TODO: We need to figure a way to get restaurants based on the user's location rather than all restaurants
 		if err := db.Find(&restaurants).Error; err != nil {
 			fmt.Println("Error retrieving restaurants:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve restaurants"})
