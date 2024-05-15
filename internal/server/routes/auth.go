@@ -1,12 +1,13 @@
 package routes
 
 import (
-	"github.com/gin-gonic/gin"
 	"waitress-backend/internal/handlers"
+
+	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-func AuthRoutes (router *gin.Engine, db *gorm.DB) {
+func AuthRoutes(router *gin.Engine, db *gorm.DB) {
 	auth := router.Group("api/auth")
 	{
 		auth.POST("/login", handlers.Login(db, router))

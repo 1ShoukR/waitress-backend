@@ -37,7 +37,6 @@ func New() Service {
 	}
 	fmt.Printf("Connecting with username: %s, password: %s, host: %s, port: %s, database: %s\n", username, password, host, port, dbname)
 
-
 	// Opening a driver typically will not attempt to connect to the database.
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, dbname))
 	if err != nil {
