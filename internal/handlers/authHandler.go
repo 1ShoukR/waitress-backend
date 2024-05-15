@@ -34,7 +34,7 @@ func createToken(username string) (string, error) {
     return "", err
     }
 
- return tokenString, nil
+    return tokenString, nil
 }
 
 func verifyToken(tokenString string) error {
