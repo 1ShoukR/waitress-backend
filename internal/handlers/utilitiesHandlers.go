@@ -23,6 +23,11 @@ func Seed(db *gorm.DB) gin.HandlerFunc {
 
 func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Migrate the APIClient table
+		if err := db.AutoMigrate(&models.APIClient{}); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate API Client table: %v", err)})
+			return
+		}
 		// Migrate the Entity table first as it might be referenced by other tables
 		if err := db.AutoMigrate(&models.Entity{}); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Entity table: %v", err)})
@@ -33,14 +38,14 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate User table: %v", err)})
 			return
 		}
-		// Migrate the APIClient table
-		if err := db.AutoMigrate(&models.APIClient{}); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate API Client table: %v", err)})
-			return
-		}
 		// Migrate the Restaurant table
 		if err := db.AutoMigrate(&models.Restaurant{}); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Restaurant table: %v", err)})
+			return
+		}
+		// Migrate the Rating table
+		if err := db.AutoMigrate(&models.Rating{}); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Rating table: %v", err)})
 			return
 		}
 		// Migrate the Reservation table
@@ -66,15 +71,30 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 
 func RunAll(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err := db.AutoMigrate(&models.Entity{}, &models.User{}, &models.APIClient{}, &models.Restaurant{}, &models.Reservation{}, &models.Table{},&models.Receipt{}); err != nil {
+		// Create tables in the correct order
+		if err := db.AutoMigrate(
+			&models.APIClient{},
+			&models.Entity{},
+			&models.User{},
+			&models.Restaurant{},
+			&models.Rating{},
+			&models.Receipt{},
+			&models.Reservation{},
+			&models.MenuItem{},
+			&models.Order{},
+			&models.Table{},
+		); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate all tables: %v", err)})
 			return
 		}
+
 		c.JSON(http.StatusOK, gin.H{"message": "All tables migrated successfully"})
+
 		if err := database.Seeder.Seed(&database.UserSeeder{}, db); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
+
 		c.JSON(http.StatusOK, gin.H{"message": "seeded"})
 	}
 }
