@@ -3,17 +3,18 @@ package handlers
 import (
 	"net/http"
 	"waitress-backend/internal/database"
+
 	// "waitress-backend/internal/handlers"
-	"waitress-backend/internal/models"
 	"fmt"
+	"waitress-backend/internal/models"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
-
 func Seed(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err:= database.Seeder.Seed(&database.UserSeeder{}, db); err != nil {
+		if err := database.Seeder.Seed(&database.UserSeeder{}, db); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 			return
 		}
@@ -63,7 +64,7 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Receipt table: %v", err)})
 			return
 		}
-		
+
 		// If all migrations succeed, send a success message
 		c.JSON(http.StatusOK, gin.H{"message": "All tables migrated successfully"})
 	}

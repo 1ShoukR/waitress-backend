@@ -29,7 +29,6 @@ type Server struct {
 	router *gin.Engine // Add the Gin Engine to the Server struct
 }
 
-
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{
@@ -51,14 +50,14 @@ func NewServer() *http.Server {
 		db:     db,
 		router: router, // Initialize the Gin Engine here
 	}
-	
+
 	// Setup route groups
 	routes.UserRoutes(newServer.router, db)
 	routes.AuthRoutes(newServer.router, db)
 	routes.RestaurantRoutes(newServer.router, db)
 	routes.UtilitiesRoutes(newServer.router, db)
 	// ... include other route groups as needed
-	
+
 	// Configure the HTTP server
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", newServer.port),
@@ -67,6 +66,6 @@ func NewServer() *http.Server {
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
-	
+
 	return server
 }

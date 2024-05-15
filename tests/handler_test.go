@@ -1,11 +1,14 @@
 package tests
+
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"github.com/gin-gonic/gin"
 	"waitress-backend/internal/server"
+
+	"github.com/gin-gonic/gin"
 )
+
 func TestHelloWorldHandler(t *testing.T) {
 	s := &server.Server{}
 	r := gin.New()
@@ -23,9 +26,9 @@ func TestHelloWorldHandler(t *testing.T) {
 	if status := rr.Code; status != http.StatusOK {
 		t.Errorf("Handler returned wrong status code: got %v want %v", status, http.StatusOK)
 	}
-    // Check the response body
-    expected := "{\"message\":\"Hello World\"}"
-    if rr.Body.String() != expected {
-        t.Errorf("Handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
-    }
+	// Check the response body
+	expected := "{\"message\":\"Hello World\"}"
+	if rr.Body.String() != expected {
+		t.Errorf("Handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+	}
 }

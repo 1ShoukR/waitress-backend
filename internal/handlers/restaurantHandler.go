@@ -17,7 +17,7 @@ import (
 
 func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Here, we will query for a restaurant based 
+		// Here, we will query for a restaurant based
 		// On the owner/admin. Using a discriminator,
 		// We can control what the flow of this func
 		// looks like. For example, we can edit the tables,
@@ -89,7 +89,6 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
-
 func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Parse and validate form inputs
@@ -124,14 +123,14 @@ func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		}
 		// Create newRestaurant struct with correct types
 		newRestaurant := models.Restaurant{
-			Name: name,
-			Address: restaurantAddress,
-			Phone: restaurantPhone,
-			Email: restaurantEmail,
-			Website: &restaurantWebsite,
+			Name:           name,
+			Address:        restaurantAddress,
+			Phone:          restaurantPhone,
+			Email:          restaurantEmail,
+			Website:        &restaurantWebsite,
 			NumberOfTables: &numberOfTables,
-			Latitude: &lat,
-			Longitude: &long,
+			Latitude:       &lat,
+			Longitude:      &long,
 		}
 		// Print the struct for debugging
 		fmt.Printf("%+v\n", newRestaurant)
@@ -146,10 +145,9 @@ func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
-
 func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// We are going to transform this to be a reservation from 
+		// We are going to transform this to be a reservation from
 		// a restaurant, based on a user.
 		reservationId := c.Param("restaurantId")
 		fmt.Printf("Reservation ID: %s\n", reservationId)
