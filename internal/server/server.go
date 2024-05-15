@@ -14,6 +14,7 @@ import (
 	gormsessions "github.com/gin-contrib/sessions/gorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 
 	"github.com/gin-contrib/sessions"
@@ -32,6 +33,7 @@ type Server struct {
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
