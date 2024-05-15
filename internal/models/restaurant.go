@@ -30,6 +30,18 @@ type Restaurant struct {
     Receipts        []Receipt       `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
     Reservations    *[]Reservation  `gorm:"foreignKey:RestaurantID"`
     Owner           User            `gorm:"foreignKey:OwnerID"`
+    Ratings         *[]Rating        `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
+    // Calculated fields
+    AverageRating  *float64 `gorm:"-"`
+    ReviewCount    *int     `gorm:"-"`
+}
+type Rating struct {
+    RatingID        uint            `gorm:"primaryKey;autoIncrement:true"`
+    Comment         string          `gorm:"size:255"`
+    Rating          uint            `gorm:"not null"`
+    RestaurantID    uint            `gorm:"not null"`
+    UserID          uint            `gorm:"not null"`
+    Restaurant      Restaurant  `gorm:"foreignKey:RestaurantID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 // Reservation represents a reservation record in the database.
@@ -63,7 +75,7 @@ type Order struct {
 	UserID         uint            `gorm:"not null"`
 	Total          *float64        // Pointer to allow nil (nullable)
 	IsPaid         bool            `gorm:"default:false"`
-	Reservation    Reservation     `gorm:"foreignKey:ReservationID"`
+	// Reservation    Reservation     `gorm:"foreignKey:ReservationID"`
 }
 
 type Table struct {
