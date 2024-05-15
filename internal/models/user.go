@@ -31,12 +31,13 @@ type User struct {
 	Address 	 *string
 	ProfileImage *string
     Reservations []Reservation  `gorm:"foreignKey:UserID"`
+    Ratings      []Rating       `gorm:"foreignKey:UserID"`
 }
 
 // GORM requires only the non-embedded fields for the model's actual mapping.
 // The embedded fields are automatically included.
 func (User) TableName() string {
-	return "user"
+    return "users"
 }
 
 func (u *User) UpdateLocation(db *gorm.DB, latitude, longitude float64, address string) error {
