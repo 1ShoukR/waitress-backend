@@ -136,6 +136,67 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
         {"Chicken Central", "321 Chicken Street", "123-323-1234", "info@chickencentral.com", rand.Intn(91) + 10, "davidwilson@example.com", 0, 0},
         {"Panda Express", "321 Panda Street", "664-353-1234", "info@pandaexpress.com", rand.Intn(91) + 10, "evemiller@example.com", 0, 0},
     }
+    ratings := []struct {
+        Comment    string
+        Rating     uint
+        RestaurantID uint
+        UserID     uint
+        }{
+        {"Great food and service!", 5, 1, 1},
+        {"Good food, but service could be better", 4, 1, 2},
+        {"Average food and service", 3, 1, 3},
+        {"Excellent experience!", 5, 1, 4},
+        {"Nice ambiance, average food", 3, 1, 5},
+        {"Delicious dishes and friendly staff", 4, 1, 6},
+        {"Will visit again!", 5, 1, 7},
+        {"Overpriced, but good quality", 4, 1, 8},
+        {"Decent food, long wait time", 3, 1, 9},
+        {"Fantastic place for a date night", 5, 1, 10},
+
+        {"Good food, but service could be better", 4, 2, 1},
+        {"Enjoyable meal", 4, 2, 2},
+        {"Will visit again", 5, 2, 3},
+        {"Nice and cozy place", 4, 2, 4},
+        {"Loved the pasta!", 5, 2, 5},
+        {"Great vegetarian options", 4, 2, 6},
+        {"Service needs improvement", 3, 2, 7},
+        {"Very crowded", 3, 2, 8},
+        {"Fresh ingredients, tasty food", 4, 2, 9},
+        {"Pleasant dining experience", 5, 2, 10},
+
+        {"Average food and service", 3, 3, 1},
+        {"Great sushi, slow service", 4, 3, 2},
+        {"Wonderful flavors", 5, 3, 3},
+        {"Overpriced sushi", 2, 3, 4},
+        {"Excellent variety of rolls", 5, 3, 5},
+        {"Fish was not fresh", 2, 3, 6},
+        {"Best sushi in town", 5, 3, 7},
+        {"Good place for a quick bite", 3, 3, 8},
+        {"Nice presentation, mediocre taste", 3, 3, 9},
+        {"Lovely atmosphere", 4, 3, 10},
+
+        {"Bad food, but good service", 2, 4, 1},
+        {"Great tacos, will come again", 5, 4, 2},
+        {"Loved the spicy options", 4, 4, 3},
+        {"Below average experience", 2, 4, 4},
+        {"Authentic Mexican flavors", 5, 4, 5},
+        {"Service was slow", 3, 4, 6},
+        {"Best tacos in the city", 5, 4, 7},
+        {"Too crowded, but food is great", 4, 4, 8},
+        {"Not worth the hype", 2, 4, 9},
+        {"Good food, reasonable prices", 4, 4, 10},
+
+        {"Terrible food and service", 1, 5, 1},
+        {"Pizza was cold", 2, 5, 2},
+        {"Fantastic crust and toppings", 5, 5, 3},
+        {"Not impressed", 2, 5, 4},
+        {"Great place for families", 4, 5, 5},
+        {"Will never come back", 1, 5, 6},
+        {"Amazing pizza, great value", 5, 5, 7},
+        {"Mediocre experience", 3, 5, 8},
+        {"Overrated", 2, 5, 9},
+        {"Good pizza, poor service", 3, 5, 10},
+    }
     emailToUserID := make(map[string]uint)
     
     for _, data := range users {
@@ -246,6 +307,18 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
         if err := tx.Model(&models.Table{}).Where("table_id = ?", r.TableID).Update("reservation_id", reservation.ReservationID).Error; err != nil {
             tx.Rollback()
             return fmt.Errorf("failed to link table %d with reservation %d: %v", r.TableID, reservation.ReservationID, err)
+        }
+    }
+    for _, r := range ratings {
+        rating := models.Rating{
+            Comment:     r.Comment,
+            Rating:      r.Rating,
+            RestaurantID: r.RestaurantID,
+            UserID:      r.UserID,
+        }
+        if err := tx.Create(&rating).Error; err != nil {
+            tx.Rollback()
+            return fmt.Errorf("failed to create rating for user %d at restaurant %d: %v", r.UserID, r.RestaurantID, err)
         }
     }
 	if err := tx.Commit().Error; err != nil {
