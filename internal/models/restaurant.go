@@ -31,6 +31,7 @@ type Restaurant struct {
     Reservations    *[]Reservation  `gorm:"foreignKey:RestaurantID"`
     Owner           User            `gorm:"foreignKey:OwnerID"`
     Ratings         *[]Rating        `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
+    ImageURL           *string         // Pointer to allow nil (nullable)
     // Calculated fields
     AverageRating  *float64 `gorm:"-"`
     ReviewCount    *int     `gorm:"-"`
