@@ -159,3 +159,37 @@ func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		c.IndentedJSON(http.StatusOK, reservationList)
 	}
 }
+
+func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var avgRating float32
+		id := c.Param("restaurantId")
+
+		// Ideally this handler should just be responsible for only retrieving data. When ratings is more fleshed out r.CalcAvgRating and r.UpdateRating
+		// should be called in endpoints where data is altered
+		// -------------------------
+		var r models.Restaurant
+		avgRating, err := r.CalcAvgRating(db, id)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"Message": "Problem calculating avg rating", "RestaurantID": id})
+			return
+		}
+
+		err = r.UpdateAvgRating(db, id, avgRating)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"Message": "Problem updating avg rating", "RestaurantID": id})
+			return
+		}
+		// ---Remove this later--
+
+		err = db.Table("restaurant").Select("average_rating").Where("restaurant_id = ?", id).Row().Scan(&avgRating)
+		if err != nil {
+			fmt.Println(err)
+			c.JSON(http.StatusInternalServerError, gin.H{"Message": "Problem getting avg rating", "RestaurantID": id})
+			return
+		}
+		c.IndentedJSON(http.StatusOK, avgRating)
+	}
+}

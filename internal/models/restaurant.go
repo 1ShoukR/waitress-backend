@@ -34,8 +34,8 @@ type Restaurant struct {
 	Ratings        *[]Rating      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	ImageURL       *string        // Pointer to allow nil (nullable)
 	// Calculated fields
-	AverageRating *float64 `gorm:"-"`
-	ReviewCount   *int     `gorm:"-"`
+	AverageRating float32 `gorm:"default:0"`
+	ReviewCount   *int    `gorm:"-"`
 }
 type Rating struct {
 	RatingID     uint       `gorm:"primaryKey;autoIncrement:true"`
@@ -94,4 +94,20 @@ type Table struct {
 	// Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 	// Reservation  Reservation `gorm:"foreignKey:ReservationID"`
 	// Customer     User        `gorm:"foreignKey:CustomerID"`
+}
+
+func (r *Restaurant) CalcAvgRating(db *gorm.DB, restaurantId string) (float32, error) {
+	var avgRating float32
+	err := db.Table("rating").Select("AVG(rating) as average_rating").Where("restaurant_id = ?", restaurantId).Row().Scan(&avgRating)
+	if err != nil {
+		return 0, err
+	}
+	return avgRating, nil
+}
+
+func (r *Restaurant) UpdateAvgRating(db *gorm.DB, restaurantId string, avgRating float32) error {
+	if err := db.Model(&Restaurant{}).Where("restaurant_id = ?", restaurantId).Update("average_rating", avgRating).Error; err != nil {
+		return err
+	}
+	return nil
 }
