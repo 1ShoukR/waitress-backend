@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"golang.org/x/crypto/bcrypt"
+
 	// "waitress-backend/internal/handlers"
 	"waitress-backend/internal/models"
 
@@ -33,16 +35,49 @@ func CreateUser(db *gorm.DB) gin.HandlerFunc {
 		city := c.PostForm("city")
 		state := c.PostForm("state")
 		zip := c.PostForm("zip")
-		fmt.Println(email, password, firstName, lastName, userType, latitude, longitude, address, city, state, zip)
-		c.IndentedJSON(http.StatusOK, gin.H{"message": "User created successfully"})
 		if email == "" || password == "" {
 			c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid login credentials"})
 			return
 		}
-		// salt := handlers.GenerateSalt(16)
-		// hashedPassword := handlers.HashPassword()
+		fmt.Println(email, password, firstName, lastName, userType, latitude, longitude, address, city, state, zip)
+		// hash the password
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error hashing password"})
+			return
+		}
+		// Concatenate the address fields to create a single address string
+		var newUser models.User
+		fullUserAddress := address + ", " + city + ", " + state + " " + zip
+		newUser.Email = email
+		newUser.PasswordHash = string(hashedPassword)
+		newUser.Entity.FirstName = firstName
+		newUser.Entity.LastName = lastName
+		newUser.AuthType = userType
+		newUser.Latitude, _ = strconv.ParseFloat(latitude, 64)
+		newUser.Longitude, _ = strconv.ParseFloat(longitude, 64)
+		newUser.Address = &fullUserAddress
+
+		// Create the user
+		if err := db.Create(&newUser).Error; err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating user"})
+			return
+		}
+		token, err := createToken(newUser.Email)
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating token"})
+			return
+		}
+		if err := verifyToken(token); err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error verifying token"})
+			return
+		}
+		c.IndentedJSON(http.StatusOK, gin.H{
+			"message": "User created successfully",
+			"user":    newUser,
+			"token":   token,
+	})
 	}
-	// logic to create a new user
 }
 
 func GetUser(db *gorm.DB) gin.HandlerFunc {
