@@ -10,7 +10,7 @@ import (
 func UserRoutes(router *gin.Engine, db *gorm.DB) {
 	user := router.Group("api/users")
 	{
-		user.GET("/create", handlers.CreateUser(db))
+		user.POST("/create", handlers.CreateUser(db))
 		user.POST("/get", handlers.GetUser(db))
 		user.POST("/update-user-location", handlers.UpdateUserLocation(db))
 		// user.POST("/", handlers.CreateUser)
