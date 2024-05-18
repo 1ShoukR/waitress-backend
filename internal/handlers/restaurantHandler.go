@@ -28,16 +28,6 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
-func GetTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// We are going to transform this to be a reservation from
-		// a restaurant, based on a user.
-		// reservationId := c.Param("restaurantId")
-		// fmt.Printf("Reservation ID: %s\n", reservationId)
-		var restaurantList []models.Restaurant
-	}
-}
-
 func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//TODO - Make this based off of the user's location
@@ -200,6 +190,22 @@ func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"Message": "Problem getting avg rating", "RestaurantID": id})
 			return
 		}
-		c.IndentedJSON(http.StatusOK, avgRating)
+		c.IndentedJSON(http.StatusOK, gin.H{"RestaurantId": id, "AverageRating": avgRating})
+	}
+}
+
+func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var restaurants []models.Restaurant
+		err := db.Table("restaurant").
+			Order("average_rating DESC").
+			Limit(10).
+			Find(&restaurants).Error
+		if err != nil {
+			fmt.Println("Error executing the query:", err)
+			return
+		}
+
+		c.IndentedJSON(http.StatusOK, restaurants)
 	}
 }

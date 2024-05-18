@@ -22,7 +22,7 @@ type User struct {
 	UserID       uint   `gorm:"primaryKey;autoIncrement"`
 	Entity       Entity `gorm:"foreignKey:EntityID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	Email        string `gorm:"size:255;not null;unique"`
-	PasswordHash string `gorm:"size:255;not null"`
+	PasswordHash string `gorm:"size:255;not null" json:"-"`
 	// Salt         string         `gorm:"size:255"`
 	AccessRevoked bool
 	AuthType      string `gorm:"size:50"`
