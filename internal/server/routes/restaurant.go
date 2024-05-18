@@ -21,6 +21,7 @@ func RestaurantRoutes(router *gin.Engine, db *gorm.DB) {
 		// Applying more specific or different groups as needed
 		restaurantRoutes.POST("/local", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetLocalRestaurants(db, router))
 		restaurantRoutes.POST("/reservations/:restaurantId/get", utilities.UserRequired(authGroups, "Staff", "all"), handlers.GetReservations(db, router))
+		restaurantRoutes.POST("/:restaurantId/get", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetSingleRestaurant(db, router))
 		restaurantRoutes.GET("/avgrating/:restaurantId", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetAvgRating(db, router))
 		restaurantRoutes.POST("/top10restaurants/", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetGlobalTopRestaurants(db, router))
 	}
