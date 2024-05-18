@@ -28,6 +28,16 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+func GetTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// We are going to transform this to be a reservation from
+		// a restaurant, based on a user.
+		// reservationId := c.Param("restaurantId")
+		// fmt.Printf("Reservation ID: %s\n", reservationId)
+		var restaurantList []models.Restaurant
+	}
+}
+
 func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//TODO - Make this based off of the user's location
