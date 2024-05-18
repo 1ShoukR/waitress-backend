@@ -160,6 +160,19 @@ func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		restaurantId := c.Param("restaurantId")
+		fmt.Printf("Restaurant ID: %s\n", restaurantId)
+		var restaurant models.Restaurant
+		results := db.First(&restaurant, restaurantId)
+		if results.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Message": results.Error.Error()})
+		}
+		c.IndentedJSON(http.StatusOK, restaurant)
+	}
+}
+
 func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var avgRating float32
