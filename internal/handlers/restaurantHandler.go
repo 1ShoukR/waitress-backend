@@ -165,9 +165,10 @@ func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		restaurantId := c.Param("restaurantId")
 		fmt.Printf("Restaurant ID: %s\n", restaurantId)
 		var restaurant models.Restaurant
-		results := db.First(&restaurant, restaurantId)
+		results := db.Preload("Ratings").First(&restaurant, restaurantId)
 		if results.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Message": results.Error.Error()})
+			return
 		}
 		c.IndentedJSON(http.StatusOK, restaurant)
 	}
