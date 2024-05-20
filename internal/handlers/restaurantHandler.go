@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"waitress-backend/internal/models"
-	"waitress-backend/internal/utilities"
+	// "waitress-backend/internal/utilities"
 
 	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -30,62 +30,63 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//TODO - Make this based off of the user's location
 		var restaurants []models.Restaurant
 		userLatStr := c.PostForm("latitude")
 		userLongStr := c.PostForm("longitude")
 		apiToken := c.PostForm("apiToken")
-
 		fmt.Println("Received latitude:", userLatStr)
 		fmt.Println("Received longitude:", userLongStr)
 		fmt.Println("Received apiToken:", apiToken)
-
 		userLat, err := strconv.ParseFloat(userLatStr, 64)
 		if err != nil {
 			fmt.Println("Error parsing latitude:", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid latitude"})
 			return
 		}
-
 		userLong, err := strconv.ParseFloat(userLongStr, 64)
 		if err != nil {
 			fmt.Println("Error parsing longitude:", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude"})
 			return
 		}
-
 		maxDistance := 5000.0 // Max distance in meters
-
-		// Retrieve all restaurants
-		// TODO: We need to figure a way to get restaurants based on the user's location rather than all restaurants
-		if err := db.Find(&restaurants).Error; err != nil {
-			fmt.Println("Error retrieving restaurants:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve restaurants"})
+		// SQL query to calculate distance and filter restaurants (shoutout ChatGPT for the query!)
+		query := `
+			SELECT *, (
+				6371000 * acos(
+					cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) +
+					sin(radians(?)) * sin(radians(latitude))
+				)
+			) AS distance
+			FROM restaurant
+			HAVING distance < ?
+			ORDER BY distance
+		`
+		// Use raw SQL query to get nearby restaurants
+		err = db.Raw(query, userLat, userLong, userLat, maxDistance).Scan(&restaurants).Error
+		if err != nil {
+			fmt.Println("Error executing the query:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching nearby restaurants"})
 			return
 		}
-
-		if len(restaurants) == 0 {
-			fmt.Println("No restaurants found in database.")
-		} else {
-			fmt.Println("Total restaurants retrieved:", len(restaurants))
-		}
-
-		var nearbyRestaurants []models.Restaurant
-		// Need to figure out how to get the distance between the user and the restaurant
-		// and only return the restaurants that are within the max distance
+		// Get the IDs of the filtered restaurants
+		var restaurantIDs []uint
 		for _, restaurant := range restaurants {
-			if utilities.Haversine(userLat, userLong, *restaurant.Latitude, *restaurant.Longitude) <= maxDistance {
-				nearbyRestaurants = append(nearbyRestaurants, restaurant)
-			}
+			restaurantIDs = append(restaurantIDs, restaurant.RestaurantId)
 		}
-
-		if len(nearbyRestaurants) == 0 {
+		// Retrieve restaurants with preloaded ratings based on the filtered restaurant IDs
+		err = db.Preload("Ratings").Where("restaurant_id IN (?)", restaurantIDs).Find(&restaurants).Error
+		if err != nil {
+			fmt.Println("Error preloading ratings:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to preload ratings"})
+			return
+		}
+		if len(restaurants) == 0 {
 			fmt.Println("No nearby restaurants found within", maxDistance, "meters.")
 		} else {
-			fmt.Println("Nearby restaurants found:", len(nearbyRestaurants))
+			fmt.Println("Nearby restaurants found:", len(restaurants))
 		}
-
-		c.JSON(http.StatusOK, gin.H{"restaurants": nearbyRestaurants})
+		c.IndentedJSON(http.StatusOK, restaurants)
 	}
 }
 
@@ -212,11 +213,13 @@ func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var restaurants []models.Restaurant
 		err := db.Table("restaurant").
+			Preload("Ratings").
 			Order("average_rating DESC").
 			Limit(10).
 			Find(&restaurants).Error
 		if err != nil {
 			fmt.Println("Error executing the query:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching top restaurants"})
 			return
 		}
 
