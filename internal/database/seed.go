@@ -118,6 +118,19 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		{"Sarah", "Garcia", "sarahgarcia@example.com", "Test123!", "customer", "400 Chambers St, New York, NY 10282"},
 		{"Bahad", "Badiya", "BahadBadiya@example.com", "Test123!", "customer", "319 E 50th St, New York, NY 10022"},
 	}
+
+	categoryData := []struct {
+		CategoryName string
+		ImageURL     string
+	}{
+		{"American", "https://images.unsplash.com/photo-1602030638412-bb8dcc0bc8b0?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Italian", "https://images.unsplash.com/photo-1616299915952-04c803388e5f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTl8fGl0YWxpYW4lMjBmb29kfGVufDB8fDB8fHww"},
+		{"Japanese", "https://images.unsplash.com/photo-1611143669185-af224c5e3252?q=80&w=2664&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Mexican", "https://images.unsplash.com/photo-1629793980446-192d630f0dbe?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWV4aWNhbiUyMGZvb2R8ZW58MHx8MHx8fDA%3D"},
+		{"Pizza", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=2581&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Chinese", "https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=2584&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+	}
+
 	const (
 		grillHouseImage string = "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
 		pastaparadise   string = "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -137,15 +150,30 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		Latitude    float64
 		Longitude   float64
 		ImageURL    string
+		Categories  []models.Category
 	}{
-		{"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", 0, 0, grillHouseImage},
-		{"Pasta Paradise", "456 Pasta Lane", "456-789-0123", "info@pastaparadise.com", rand.Intn(91) + 10, "janesmith@example.com", 0, 0, pastaparadise},
-		{"Sushi World", "789 Sushi Blvd", "789-012-3456", "contact@sushiworld.com", rand.Intn(91) + 10, "alicejohnson@example.com", 0, 0, sushiworld},
-		{"Taco Land", "101 Taco Way", "234-567-8901", "hello@tacoland.com", rand.Intn(91) + 10, "bobbrown@example.com", 0, 0, tacoland},
-		{"Pizza Central", "321 Pizza Street", "567-890-1234", "info@pizzacentral.com", rand.Intn(91) + 10, "caroldavis@example.com", 0, 0, pizzacentral},
-		{"Chicken Central", "321 Chicken Street", "123-323-1234", "info@chickencentral.com", rand.Intn(91) + 10, "davidwilson@example.com", 0, 0, chickencentral},
-		{"Panda Express", "321 Panda Street", "664-353-1234", "info@pandaexpress.com", rand.Intn(91) + 10, "evemiller@example.com", 0, 0, pandaexpress},
+		{"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", 0, 0, grillHouseImage,
+			[]models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}},
+
+		{"Pasta Paradise", "456 Pasta Lane", "456-789-0123", "info@pastaparadise.com", rand.Intn(91) + 10, "janesmith@example.com", 0, 0, pastaparadise,
+			[]models.Category{{CategoryName: "Italian"}}},
+
+		{"Sushi World", "789 Sushi Blvd", "789-012-3456", "contact@sushiworld.com", rand.Intn(91) + 10, "alicejohnson@example.com", 0, 0, sushiworld,
+			[]models.Category{{CategoryName: "Japanese"}, {CategoryName: "American"}, {CategoryName: "Fast Food"}}},
+
+		{"Taco Land", "101 Taco Way", "234-567-8901", "hello@tacoland.com", rand.Intn(91) + 10, "bobbrown@example.com", 0, 0, tacoland,
+			[]models.Category{{CategoryName: "Mexican"}}},
+
+		{"Pizza Central", "321 Pizza Street", "567-890-1234", "info@pizzacentral.com", rand.Intn(91) + 10, "caroldavis@example.com", 0, 0, pizzacentral,
+			[]models.Category{{CategoryName: "Pizza"}, {CategoryName: "Fast Food"}}},
+
+		{"Chicken Central", "321 Chicken Street", "123-323-1234", "info@chickencentral.com", rand.Intn(91) + 10, "davidwilson@example.com", 0, 0, chickencentral,
+			[]models.Category{{CategoryName: "Chinese"}}},
+
+		{"Panda Express", "321 Panda Street", "664-353-1234", "info@pandaexpress.com", rand.Intn(91) + 10, "evemiller@example.com", 0, 0, pandaexpress,
+			[]models.Category{{CategoryName: "Chinese"}, {CategoryName: "Fast Food"}}},
 	}
+
 	ratings := []struct {
 		Comment      string
 		Rating       uint
@@ -261,9 +289,33 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		}
 	}
 
+	for _, data := range categoryData {
+		category := models.Category{
+			CategoryName: data.CategoryName,
+			ImageURL:     &data.ImageURL,
+		}
+		if err := tx.Create(&category).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to create category %s: %v", data.CategoryName, err)
+		}
+	}
+
 	for _, data := range restaurantData {
+
+		var categories []models.Category
+
+		for _, category := range data.Categories {
+			var c models.Category
+			if err := tx.Where("category_name = ?", category.CategoryName).FirstOrCreate(&c, category).Error; err != nil {
+				tx.Rollback()
+				return fmt.Errorf("failed to find category %s: %v", category.CategoryName, err)
+			}
+			categories = append(categories, c)
+		}
+
 		lat, long := generateGeolocation(baseLat, baseLong, variance)
 		ownerID, exists := emailToUserID[data.OwnerEmail]
+
 		if !exists {
 			return fmt.Errorf("no user ID found for email: %s", data.OwnerEmail)
 		}
@@ -277,12 +329,15 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 			Latitude:       &lat,
 			Longitude:      &long,
 			ImageURL:       &data.ImageURL,
+			Categories:     categories,
 		}
+
 		if err := tx.Create(&restaurant).Error; err != nil {
 			tx.Rollback()
 			return fmt.Errorf("failed to create restaurant with email %s: %v", data.Email, err)
 		}
 	}
+
 	for _, data := range tables {
 		var restaurant models.Restaurant
 		if err := tx.Where("restaurant_id = ?", data.RestaurantID).First(&restaurant).Error; err != nil {
