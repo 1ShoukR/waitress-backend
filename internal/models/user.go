@@ -34,6 +34,19 @@ type User struct {
 	Ratings       []Rating      `gorm:"foreignKey:UserID"`
 }
 
+func (user *User) UpdateAccountInformation(db *gorm.DB, firstName string, lastName string, email string, address string, city string, state string, zip string) (*User, error) {
+	userAddress := address + ", " + city + ", " + state + " " + zip
+	user.Entity.FirstName = firstName
+	user.Entity.LastName = lastName
+	user.Email = email
+	user.Address = &userAddress
+	
+	if err := db.Save(user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 // GORM requires only the non-embedded fields for the model's actual mapping.
 // The embedded fields are automatically included.
 func (User) TableName() string {
