@@ -125,3 +125,31 @@ func UpdateUserLocation(db *gorm.DB) gin.HandlerFunc {
 		c.JSON(http.StatusOK, gin.H{"message": "User location updated successfully", "user": foundUser})
 	}
 }
+
+func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var foundUser models.User
+		userId := c.PostForm("userId")
+		firstName := c.PostForm("firstName")
+		lastName := c.PostForm("lastName")
+		email := c.PostForm("email")
+		address := c.PostForm("address")
+		city := c.PostForm("city")
+		state := c.PostForm("state")
+		zip := c.PostForm("zip")
+
+		if err := db.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+			return
+		}
+
+		// Update user information
+		updatedUser, err := foundUser.UpdateAccountInformation(db, firstName, lastName, email, address, city, state, zip); 
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"message": "User account information updated successfully", "user": updatedUser})
+	}
+}
