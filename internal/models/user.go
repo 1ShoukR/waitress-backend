@@ -28,18 +28,20 @@ type User struct {
 	AuthType      string `gorm:"size:50"`
 	Latitude      float64
 	Longitude     float64
+	Phone		  *string
 	Address       *string
 	ProfileImage  *string
 	Reservations  []Reservation `gorm:"foreignKey:UserID"`
 	Ratings       []Rating      `gorm:"foreignKey:UserID"`
 }
 
-func (user *User) UpdateAccountInformation(db *gorm.DB, firstName string, lastName string, email string, address string, city string, state string, zip string) (*User, error) {
+func (user *User) UpdateAccountInformation(db *gorm.DB, firstName string, lastName string, email string, address string, city string, state string, zip string, phone string) (*User, error) {
 	userAddress := address + ", " + city + ", " + state + " " + zip
 	user.Entity.FirstName = firstName
 	user.Entity.LastName = lastName
 	user.Email = email
 	user.Address = &userAddress
+	user.Phone = &phone
 	
 	if err := db.Save(user).Error; err != nil {
 		return nil, err
