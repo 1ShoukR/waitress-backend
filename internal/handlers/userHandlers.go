@@ -133,10 +133,12 @@ func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 		firstName := c.PostForm("firstName")
 		lastName := c.PostForm("lastName")
 		email := c.PostForm("email")
-		address := c.PostForm("address")
+		phone := c.PostForm("phone")
+		street := c.PostForm("street")
 		city := c.PostForm("city")
 		state := c.PostForm("state")
 		zip := c.PostForm("zip")
+		address := street + ", " + city + ", " + state + " " + zip
 
 		if err := db.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
@@ -144,7 +146,7 @@ func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Update user information
-		updatedUser, err := foundUser.UpdateAccountInformation(db, firstName, lastName, email, address, city, state, zip); 
+		updatedUser, err := foundUser.UpdateAccountInformation(db, firstName, lastName, email, address, city, state, zip, phone); 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
