@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -10,6 +11,7 @@ import (
 	// "waitress-backend/internal/handlers"
 	"waitress-backend/internal/models"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -140,8 +142,13 @@ func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 		zip := c.PostForm("zip")
 		address := street + ", " + city + ", " + state + " " + zip
 
-		if err := db.Where("user_id = ?", userId).First(&foundUser).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+		result := db.Preload("Entity").Where("user_id = ?", userId).First(&foundUser)
+		if result.Error != nil {
+			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"message": "Database error"})
+			}
 			return
 		}
 
@@ -151,7 +158,7 @@ func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-
-		c.JSON(http.StatusOK, gin.H{"message": "User account information updated successfully", "user": updatedUser})
+		token := sessions.Default(c).Get("apiToken")
+		c.JSON(http.StatusOK, gin.H{"message": "User account information updated successfully", "user": updatedUser, "token": token})
 	}
 }
