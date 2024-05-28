@@ -1,3 +1,14 @@
+// This file contains models related to a restaurant and its related entities
+//
+// The models here are as follows:
+// - Receipt
+// - Restaurant
+// - Reservation
+// - MenuItem
+// - Order
+// - Table
+
+
 package models
 
 import (
@@ -37,6 +48,9 @@ type Restaurant struct {
 	AverageRating float32 `gorm:"default:0"`
 	ReviewCount   *int    `gorm:"-"`
 }
+
+// Rating represents a rating record in the database.
+// We can use this to calculate the average rating for a restaurant.
 type Rating struct {
 	RatingID     uint       `gorm:"primaryKey;autoIncrement:true"`
 	Comment      string     `gorm:"size:255"`
@@ -80,6 +94,7 @@ type Order struct {
 	// Reservation    Reservation     `gorm:"foreignKey:ReservationID"`
 }
 
+// Table represents a table record in the database.
 type Table struct {
 	TableID             uint   `gorm:"primaryKey;autoIncrement"`
 	RestaurantID        uint   `gorm:"not null"`
@@ -96,6 +111,7 @@ type Table struct {
 	// Customer     User        `gorm:"foreignKey:CustomerID"`
 }
 
+// CalcAvgRating calculates the average rating for a restaurant.
 func (r *Restaurant) CalcAvgRating(db *gorm.DB, restaurantId string) (float32, error) {
 	var avgRating float32
 	err := db.Table("rating").Select("AVG(rating) as average_rating").Where("restaurant_id = ?", restaurantId).Row().Scan(&avgRating)
@@ -105,6 +121,7 @@ func (r *Restaurant) CalcAvgRating(db *gorm.DB, restaurantId string) (float32, e
 	return avgRating, nil
 }
 
+// UpdateAvgRating updates the average rating for a restaurant.
 func (r *Restaurant) UpdateAvgRating(db *gorm.DB, restaurantId string, avgRating float32) error {
 	if err := db.Model(&Restaurant{}).Where("restaurant_id = ?", restaurantId).Update("average_rating", avgRating).Error; err != nil {
 		return err
