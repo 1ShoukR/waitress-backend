@@ -1,3 +1,8 @@
+// This is the entry point of the Application
+//
+// It creates a new server instance and starts the server
+
+
 package main
 
 import (
