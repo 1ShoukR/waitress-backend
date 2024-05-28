@@ -2,63 +2,64 @@
 
 ## Introduction
 
-This is the project repository for Waotress.
+Welcome to Waitress. This is the backend repository for the Waitress project. This project is an application that allows users to order food from a restaurant, reserve their favorite seat, and have their food to their table in no time. The backend is built using the Golang, while utilizing the Gin Framework. The mobile application is built using React Native. The project is currently in development.
 
-## Getting Started
+NOTE: This repository contains a Python Flask implementation of the backend. The Golang implementation is currently in development, and will be the main application that we shall be using. The Python implementation is only for reference purposes, as it was the origial implementation of the backend.
 
-The primary source of information about this project is its documentation. This README is intended to only get you as far as building that documentation locally. From there you can switch to the docs to further learn how to run and develop locally.
-
-1. Clone this repository, and navigate into it.
-
-       git clone https://github.com/1ShoukR/waitress-backend.git
-       cd waitress-backend
-
-1. Create and activate a virtual environment. Make sure you do this with a compatible version of Python (preferably 3.8).
-
-    Unix Example:
-
-        python3 -m venv venv
-        source ./venv/Scripts/activate
-
-    Windows Example:
-
-        python -m venv venv
-        .\venv\Scripts\activate
-
-    Git Bash Example
-        $ python -m venv venv
-        $ venv\Scripts\activate
-
-1. Make sure your virtual environment has the latest version of Pip.
-
-        python -m pip install --upgrade pip
-
-1. Install this project into your virtual environment.
-
-        pip install -r requirements.txt
-
-    Be sure to install `requirements.txt`, otherwise you won't get development dependencies such as Sphinx.
-
-1. Navigate to the docs folder, and build the docs using Sphinx.
-
-        cd docs
-        sphinx-build -M html docs/source/ docs/build/
-
-1. The `sphinx-build -M html docs/source/ docs/build/` script should generate a `build` directory. Open `build/html/index.html` to access the docs.
-
-## Golang Rewrite
-
-- This application is being rewritten in Goalng.
-- This is the MAIN branch that will hold the code that will be eventually merged into the `main` branch 
+Please create a .env file in the root directory of the project, and ask the project owner for the environment variables that you need to add to the .env file.
 
 ## Getting Started With Golang
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
-    - Install the latest version of Golang.
-    ( Add more instructions here )
+    - Install the latest version of Golang [here](https://golang.org/dl/)
+    - Verify that Golang is installed by running the following command in your terminal:
+        ```bash
+        go version
+        ```
+    - Clone the repository to your local machine:
+        ```bash
+        git clone https://github.com/1ShoukR/waitress-backend.git
+        ```
+    - Navigate to the project directory:
+        ```bash
+        cd waitress-backend
+        ```
+    - Install the project dependencies:
+        ```bash
+        go mod download
+        ```
+
+## MySQL Database
+
+This project uses a MySQL database to store and manage data. You are required to install MySQL on your local machine, and create a database for the project. You can install MySQL by visiting this [link](https://dev.mysql.com/downloads/mysql/). It is recommended to install MySQL Workbench as well, to manage the database.
+
+
 ## MakeFile
 
-run all make commands with clean tests
+This project uses a Makefile to automate the build process, and to make it easier to run the application.
+
+If you cannot install or use Make commands, you can run the application normally by running the following commands:
+
+To build the project, run: 
+```bash
+go build cmd/api/main.go
+```
+
+To run the project, run:
+```bash
+go run cmd/api/main.go
+```
+
+
+NOTE: If you are using Git Bash on Windows, you may need to install Make. You can install Make by visiting this stackoverflow [link](https://stackoverflow.com/questions/36770716/mingw64-make-build-error-bash-make-command-not-found).
+
+Ensure that you have the latest version of Make installed on your machine. You can check if Make is installed by running the following command in your terminal:
+
+```bash
+make --version
+```
+
+The Makefile contains the following commands:
 
 ```bash
 make all build
