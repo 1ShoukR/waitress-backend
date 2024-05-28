@@ -13,19 +13,19 @@ Please create a .env file in the root directory of the project, and ask the proj
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
     - Install the latest version of Golang [here](https://golang.org/dl/)
     - Verify that Golang is installed by running the following command in your terminal:
-        ```bash
+        ```
         go version
         ```
     - Clone the repository to your local machine:
-        ```bash
+        ```
         git clone https://github.com/1ShoukR/waitress-backend.git
         ```
     - Navigate to the project directory:
-        ```bash
+        ```
         cd waitress-backend
         ```
     - Install the project dependencies:
-        ```bash
+        ```
         go mod download
         ```
 
@@ -41,12 +41,12 @@ This project uses a Makefile to automate the build process, and to make it easie
 If you cannot install or use Make commands, you can run the application normally by running the following commands:
 
 To build the project, run: 
-```bash
+```
 go build cmd/api/main.go
 ```
 
 To run the project, run:
-```bash
+```
 go run cmd/api/main.go
 ```
 
@@ -55,54 +55,54 @@ NOTE: If you are using Git Bash on Windows, you may need to install Make. You ca
 
 Ensure that you have the latest version of Make installed on your machine. You can check if Make is installed by running the following command in your terminal:
 
-```bash
+```
 make --version
 ```
 
 The Makefile contains the following commands:
 
-```bash
+```
 make all build
 ```
 
 build the application
 
-```bash
+```
 make build
 ```
 
 run the application
 
-```bash
+```
 make run
 ```
 
 Create DB container
 
-```bash
+```
 make docker-run
 ```
 
 Shutdown DB container
 
-```bash
+```
 make docker-down
 ```
 
 live reload the application
 
-```bash
+```
 make watch
 ```
 
 run the test suite
 
-```bash
+```
 make test
 ```
 
 clean up binary from the last build
 
-```bash
+```
 make clean
 ```
