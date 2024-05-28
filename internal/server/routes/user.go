@@ -1,3 +1,9 @@
+// This file contains the routes for the user model
+//
+// The routes here are as follows:
+// - UserRoutes
+// - .. more to be added later
+
 package routes
 
 import (
@@ -6,6 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// UserRoutes sets up the routes for the user endpoints
 func UserRoutes(router *gin.Engine, db *gorm.DB) {
 	user := router.Group("api/users")
 	{

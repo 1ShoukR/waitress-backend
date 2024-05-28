@@ -1,3 +1,9 @@
+// This file contains the routes for the restaurant endpoints. It uses the handlers from the handlers package to handle the requests
+//
+// The routes here are as follows:
+// - RestaurantRoutes
+// .. more to be added later
+
 package routes
 
 import (
@@ -8,6 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// RestaurantRoutes sets up the routes for the restaurant endpoints
 func RestaurantRoutes(router *gin.Engine, db *gorm.DB) {
 	userGroups := utilities.NewUserGroups()           // Initialize your user groups
 	authGroups := utilities.NewAuthGroups(userGroups) // Create the auth groups from user groups

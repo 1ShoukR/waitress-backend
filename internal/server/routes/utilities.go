@@ -1,3 +1,8 @@
+// This file contains the routes for the utilities endpoints
+//
+// The routes here are as follows:
+// - UtilitiesRoutes
+
 package routes
 
 import (
@@ -8,6 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// UtilitiesRoutes sets up the routes for the utilities endpoints
 func UtilitiesRoutes(router *gin.Engine, db *gorm.DB) {
 	userGroups := utilities.NewUserGroups()           // Initialize your user groups
 	authGroups := utilities.NewAuthGroups(userGroups) // Create the auth groups from user groups
