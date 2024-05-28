@@ -1,3 +1,10 @@
+// This file contains the models for the user table in the database
+//
+// The models here are as follows:
+// - Entity
+// - User
+// - UserLogin
+
 package models
 
 import (
@@ -19,6 +26,7 @@ type Entity struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
+// User represents a user in the system.
 type User struct {
 	UserID       uint   `gorm:"primaryKey;autoIncrement"`
 	Entity       Entity `gorm:"foreignKey:EntityID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
@@ -36,6 +44,7 @@ type User struct {
 	Ratings       []Rating      `gorm:"foreignKey:UserID"`
 }
 
+// UpdateAccountInformation is a method that updates the user's account information in the database.
 func (user *User) UpdateAccountInformation(db *gorm.DB, firstName string, lastName string, email string, address string, city string, state string, zip string, phone string) (*User, error) {
 	userAddress := address 
 	fmt.Println("Email: ", email)
@@ -64,10 +73,12 @@ func (user *User) UpdateAccountInformation(db *gorm.DB, firstName string, lastNa
 
 // GORM requires only the non-embedded fields for the model's actual mapping.
 // The embedded fields are automatically included.
+// To rename a table, use the bottom method.
 func (User) TableName() string {
 	return "users"
 }
 
+// UpdateLocation is a method that updates the user's location in the database.
 func (u *User) UpdateLocation(db *gorm.DB, latitude, longitude float64, address string) error {
 	// Begin a transaction
 	tx := db.Begin()

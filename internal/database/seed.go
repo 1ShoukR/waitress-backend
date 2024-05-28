@@ -1,3 +1,8 @@
+// The database package contains database related transactions.
+//
+// This package includes the Seeder interface and the GenericSeeder struct, which is used to run multiple Seeder instances.
+// 
+
 package database
 
 import (
@@ -12,6 +17,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// generateGeolocation generates a random latitude and longitude based on the base latitude and longitude with a variance
 func generateGeolocation(baseLat, baseLong, variance float64) (float64, float64) {
 	rand.Seed(time.Now().UnixNano())
 	latVariance := variance / 1000 // Reducing the variance for latitude as Manhattan is not very wide
@@ -19,6 +25,7 @@ func generateGeolocation(baseLat, baseLong, variance float64) (float64, float64)
 	return baseLat + (rand.Float64()*2*latVariance - latVariance), baseLong + (rand.Float64()*2*longVariance - longVariance)
 }
 
+// Seeder is an interface that defines the Seed method
 type Seeder interface {
 	Seed(db *gorm.DB) error
 }
@@ -37,9 +44,10 @@ func (gs *GenericSeeder) Seed(db *gorm.DB) error {
 	}
 	return nil
 }
-
+// UserSeeder is a struct that implements the Seeder interface
 type UserSeeder struct{}
 
+// Seed creates users, restaurants, tables, reservations, ratings, and API clients in the database
 func (us *UserSeeder) Seed(db *gorm.DB) error {
 	tx := db.Begin()
 	defer func() {

@@ -1,3 +1,12 @@
+// This file contains the handlers for user related endpoints 
+//
+// The handlers here are as follows:
+// - CreateUser
+// - GetUser
+// - UpdateUserLocation
+// - UpdateUserAccountInformation
+
+
 package handlers
 
 import (
@@ -16,6 +25,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// CreateUser is a handler for creating a new user account
 func CreateUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if err := c.Request.ParseForm(); err != nil {
@@ -82,6 +92,7 @@ func CreateUser(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// GetUser is a handler for getting all users in the database
 func GetUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var users []models.User
@@ -93,6 +104,7 @@ func GetUser(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// UpdateUserLocation is a handler for updating a user's location based on their user latitude and longitude
 func UpdateUserLocation(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var foundUser models.User
@@ -128,6 +140,7 @@ func UpdateUserLocation(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// UpdateUserAccountInformation is a handler for updating a user's account information from the Edit Account page
 func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var foundUser models.User

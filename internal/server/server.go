@@ -1,3 +1,6 @@
+// This file contains the Server struct and the NewServer function that initializes the server and the Gin Engine.
+//
+// The Server struct contains the port, database connection, and the Gin Engine. The NewServer function initializes the server and the Gin Engine, sets up the route groups, and configures the HTTP server.
 package server
 
 import (
@@ -14,24 +17,24 @@ import (
 	gormsessions "github.com/gin-contrib/sessions/gorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	// "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 
 	"github.com/gin-contrib/sessions"
-	// "github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
 )
 
+// The Server struct contains the port, database connection, and the Gin Engine
 type Server struct {
-	port   int
-	db     *gorm.DB
+	port   int	 // Port number for the server
+	db     *gorm.DB // Pointer to the GORM database connection
 	router *gin.Engine // Add the Gin Engine to the Server struct
 }
 
+// NewServer initializes the server and the Gin Engine
 func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{
+	port, _ := strconv.Atoi(os.Getenv("PORT")) // Port for the server
+	db, err := gorm.Open(mysql.Open(os.Getenv("DSN")), &gorm.Config{ // Database connection
 		// Logger: logger.Default.LogMode(logger.Info),
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
@@ -46,8 +49,8 @@ func NewServer() *http.Server {
 	router := gin.Default()
 	router.Use(sessions.Sessions("mysession", store))
 	newServer := &Server{
-		port:   port,
-		db:     db,
+		port:   port, // Initialize the port number here
+		db:     db, // Initialize the GORM database connection here
 		router: router, // Initialize the Gin Engine here
 	}
 

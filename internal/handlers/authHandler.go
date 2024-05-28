@@ -1,3 +1,10 @@
+// This file contains the handlers for the authentication endpoints
+//
+// The handlers here are as follows:
+// - Login
+// - Logout
+// - createToken
+// - verifyToken
 package handlers
 
 import (
@@ -20,8 +27,10 @@ import (
 	"gorm.io/gorm"
 )
 
+// Here is how you can access the JWT_SECRET environment variable
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
+// Function to create an authentication token for a user
 func createToken(username string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
@@ -37,6 +46,7 @@ func createToken(username string) (string, error) {
 	return tokenString, nil
 }
 
+// Function to verify the authenticity of a token
 func verifyToken(tokenString string) error {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return secretKey, nil
@@ -53,6 +63,7 @@ func verifyToken(tokenString string) error {
 	return nil
 }
 
+// Logout function to clear the session
 func Logout(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
@@ -62,6 +73,7 @@ func Logout(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// Login function to authenticate a user
 func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		email := c.PostForm("email")
@@ -120,7 +132,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			Address   *string   `json:"address"`
 			CreatedAt time.Time `json:"createdAt"`
 		}
-
+		// Custom response; modify as needed. 
 		response := CustomUserResponse{
 			UserID:    foundUser.UserID,
 			FirstName: foundUser.Entity.FirstName,

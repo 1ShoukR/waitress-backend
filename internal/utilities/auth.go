@@ -1,3 +1,21 @@
+// This file contains the utilities for authentication and authorization
+//
+// The utilities here are as follows:
+// - UserType
+// - UserGroups
+// - AuthGroups
+// - CheckPasswordHash
+// - HashPassword
+// - getClientFromRequest
+// - getAuthTypeFromSession
+// - ClientRequired
+// - UserRequired
+// - mergeSets
+// - NewUserGroups
+// - NewAuthGroups
+// - printSessionValues
+
+
 package utilities
 
 import (
@@ -11,8 +29,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// UserType defines the different types of users in the system.
 type UserType string
 
+// List of user types in the system. This can be expanded as needed.
 const (
 	Dev        UserType = "dev"
 	AdminSuper UserType = "admin_super"
@@ -40,6 +60,7 @@ func (ug *UserGroups) GetAdminTypes() []string {
 	return adminTypes
 }
 
+// Transform the map keys into a slice of strings for easier access.
 func (ug *UserGroups) GetStaffTypes() []string {
 	staffTypes := make([]string, 0, len(ug.Staff))
 	for k := range ug.Staff {
@@ -57,6 +78,7 @@ type AuthGroups struct {
 	All      map[UserType]struct{}
 }
 
+// printSessionValues prints the values stored in the session for debugging purposes.
 func printSessionValues(c *gin.Context) {
 	session := sessions.Default(c)
 	userID := session.Get("userID")         // Replace "userID" with the actual key you used to store the user ID
@@ -112,11 +134,13 @@ func mergeSets(sets ...map[UserType]struct{}) map[UserType]struct{} {
 	return result
 }
 
+// CheckPasswordHash compares a password with its hash and returns true if they match.
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
 
+// HashPassword generates a hashed password from a plaintext password.
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
@@ -132,6 +156,7 @@ func getClientFromRequest(c *gin.Context) (models.APIClient, error) {
 	return client, nil
 }
 
+// getAuthTypeFromSession retrieves the auth type from the Gin session.
 func getAuthTypeFromSession(c *gin.Context) (string, error) {
 	session := sessions.Default(c)
 	authType, ok := session.Get("authType").(string)
@@ -172,6 +197,7 @@ func ClientRequired(clientTypes ...string) gin.HandlerFunc {
 	}
 }
 
+// Gin middleware that ensures the request is made by an authorized user.
 func UserRequired(authGroups AuthGroups, group, subgroup string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authType, err := getAuthTypeFromSession(c)

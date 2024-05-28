@@ -1,9 +1,16 @@
+// This file contains utilities that are more general in nature
+//
+// The utilities here are as follows:
+// - Haversine
+
+
 package utilities
 
 import (
 	"math"
 )
 
+// This function calculates the distance between two points on the Earth's surface
 func Haversine(lat1, lon1, lat2, lon2 float64) float64 {
 	const R = 6371000 // Earth radius in meters
 	latRad1 := lat1 * math.Pi / 180

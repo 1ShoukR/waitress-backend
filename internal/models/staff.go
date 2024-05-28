@@ -1,3 +1,8 @@
+// This file contains the models for the staff table in the database
+//
+// The models here are as follows:
+// - Staff
+
 package models
 
 // Staff represents a singular staff user in the database.

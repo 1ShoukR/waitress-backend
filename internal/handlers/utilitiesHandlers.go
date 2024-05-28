@@ -1,3 +1,10 @@
+// This file contains the handlers for the utilities endpoints
+//
+// The handlers here are as follows:
+// - Seed
+// - MigrateDb
+// - RunAll
+
 package handlers
 
 import (
@@ -12,6 +19,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// Seed is a handler for seeding the database with initial data for development purposes
 func Seed(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if err := database.Seeder.Seed(&database.UserSeeder{}, db); err != nil {
@@ -22,6 +30,7 @@ func Seed(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// MigrateDb is a handler for migrating the database tables
 func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Migrate the APIClient table
@@ -70,6 +79,9 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// RunAll runs all the migrations and seeds the database. 
+// NOTE: This initially errors out, however, when you hit it
+// again, it will run correctly and seed the database
 func RunAll(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Create tables in the correct order

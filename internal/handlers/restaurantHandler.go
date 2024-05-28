@@ -1,3 +1,15 @@
+// This file contains the handlers for the restaurant endpoints
+//
+// The handlers here are as follows:
+// - EditRestaurant
+// - GetLocalRestaurants
+// - CreateRestaurant
+// - GetReservations
+// - GetSingleRestaurant
+// - GetAvgRating
+// - GetGlobalTopRestaurants
+
+
 package handlers
 
 import (
@@ -15,6 +27,7 @@ import (
 	// "waitress-backend/internal/utilities"
 )
 
+// EditRestaurant is a handler for editing a restaurant
 func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Here, we will query for a restaurant based
@@ -28,6 +41,7 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+// GetLocalRestaurants is a handler for getting local restaurants based on user location
 func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var restaurants []models.Restaurant
@@ -90,6 +104,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+// CreateRestaurant is a handler for creating a new restaurant in the database
 func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Parse and validate form inputs
@@ -146,6 +161,7 @@ func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+// GetReservations is a handler for getting reservations for a specific restaurant
 func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// We are going to transform this to be a reservation from
@@ -161,6 +177,7 @@ func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+// GetSingleRestaurant is a handler for getting a single restaurant by ID
 func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		restaurantId := c.Param("restaurantId")
@@ -175,6 +192,7 @@ func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+// GetAvgRating is a handler for getting the average rating of a restaurant
 func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var avgRating float32
@@ -209,6 +227,7 @@ func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+// GetGlobalTopRestaurants is a handler for getting the top 10 global restaurants based on average rating
 func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var restaurants []models.Restaurant

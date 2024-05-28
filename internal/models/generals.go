@@ -1,3 +1,10 @@
+// This file contains models related to various entities in the system
+// 
+// The models here are as follows:
+// - APIClient
+// - KeyPair
+
+
 package models
 
 import (
