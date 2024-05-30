@@ -63,8 +63,9 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude"})
 			return
 		}
-		maxDistance := 5000.0 // Max distance in meters
-		// SQL query to calculate distance and filter restaurants (shoutout ChatGPT for the query!)
+		maxDistance := 10000.0 // Max distance in meters, increase for testing
+		
+		// SQL query to calculate distance and filter restaurants
 		query := `
 			SELECT *, (
 				6371000 * acos(
