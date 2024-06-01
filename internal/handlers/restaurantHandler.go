@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"waitress-backend/internal/models"
+
 	// "waitress-backend/internal/utilities"
 
 	// "github.com/gin-contrib/sessions"
@@ -224,5 +225,35 @@ func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		}
 
 		c.IndentedJSON(http.StatusOK, restaurants)
+	}
+}
+
+func MenuAddItem(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if err := c.Request.ParseForm(); err != nil {
+			c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid form data"})
+			return
+		}
+
+		nameOfItem := c.PostForm("nameOfItem")
+		price, err := strconv.Atoi(c.PostForm("price"))
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating price"})
+			return
+		}
+		isAvailable, err := strconv.ParseBool(c.PostForm("isAvailable"))
+		if err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error assigning availability"})
+			return
+		}
+
+		var menuItem models.MenuItem
+		menuItem.NameOfItem = nameOfItem
+		menuItem.Price = float64(price)
+		menuItem.IsAvailable = isAvailable
+		if err := db.Create(&menuItem).Error; err != nil {
+			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating menuItem"})
+			return
+		}
 	}
 }

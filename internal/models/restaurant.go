@@ -64,8 +64,8 @@ type Reservation struct {
 type MenuItem struct {
 	MenuID       uint       `gorm:"primaryKey;autoIncrement:true"`
 	RestaurantID uint       `gorm:"not null"`
-	NameOfItem   *string    // Pointer to allow nil (nullable)
-	Price        *float64   // Pointer to allow nil (nullable)
+	NameOfItem   string     // Pointer to allow nil (nullable)
+	Price        float64    // Pointer to allow nil (nullable)
 	IsAvailable  bool       `gorm:"default:true"`
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 }
