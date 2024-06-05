@@ -27,6 +27,13 @@ type Receipt struct {
 	Restaurant     Restaurant `gorm:"foreignKey:RestaurantID"`
 }
 
+// Category represents a category in which a restaurant can be classified.
+type Category struct {
+	CategoryID   uint    `gorm:"primaryKey;autoIncrement:true"`
+	CategoryName string  `gorm:"size:255;not null"`
+	ImageURL     *string // Pointer to allow nil (nullable)
+}
+
 // Restaurant represents a restaurant record in the database.
 type Restaurant struct {
 	RestaurantId   uint           `gorm:"primaryKey;autoIncrement:true"`
@@ -36,6 +43,7 @@ type Restaurant struct {
 	Phone          string         `gorm:"size:255;not null"`
 	Email          string         `gorm:"size:255;not null"`
 	Website        *string        // Pointer to allow nil (nullable)
+	Categories     []Category     `gorm:"many2many:restaurant_categories;"`
 	NumberOfTables *int           // Pointer to allow nil (nullable)
 	Latitude       *float64       // Pointer to allow nil (nullable)
 	Longitude      *float64       // Pointer to allow nil (nullable)

@@ -74,6 +74,11 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		if err := db.AutoMigrate(&models.Category{}); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate Category table: %v", err)})
+			return
+		}
+
 		// If all migrations succeed, send a success message
 		c.JSON(http.StatusOK, gin.H{"message": "All tables migrated successfully"})
 	}
@@ -96,6 +101,7 @@ func RunAll(db *gorm.DB) gin.HandlerFunc {
 			&models.MenuItem{},
 			&models.Order{},
 			&models.Table{},
+			&models.Category{},
 		); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to migrate all tables: %v", err)})
 			return
