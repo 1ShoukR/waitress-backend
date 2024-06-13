@@ -90,7 +90,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			restaurantIDs = append(restaurantIDs, restaurant.RestaurantId)
 		}
 		// Retrieve restaurants with preloaded ratings based on the filtered restaurant IDs
-		err = db.Preload("Ratings").Where("restaurant_id IN (?)", restaurantIDs).Find(&restaurants).Error
+		err = db.Preload("Ratings").Preload("Categories").Where("restaurant_id IN (?)", restaurantIDs).Find(&restaurants).Error
 		if err != nil {
 			fmt.Println("Error preloading ratings:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to preload ratings"})
@@ -184,11 +184,12 @@ func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		restaurantId := c.Param("restaurantId")
 		fmt.Printf("Restaurant ID: %s\n", restaurantId)
 		var restaurant models.Restaurant
-		results := db.Preload("Ratings").First(&restaurant, restaurantId)
+		results := db.Preload("Ratings").Preload("Categories").First(&restaurant, restaurantId)
 		if results.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"Message": results.Error.Error()})
 			return
 		}
+		fmt.Printf("results: %+v\n", restaurant)
 		c.IndentedJSON(http.StatusOK, restaurant)
 	}
 }
@@ -236,6 +237,7 @@ func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			Preload("Ratings").
 			Order("average_rating DESC").
 			Limit(10).
+			Preload("Categories").
 			Find(&restaurants).Error
 		if err != nil {
 			fmt.Println("Error executing the query:", err)
@@ -244,5 +246,17 @@ func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		}
 
 		c.IndentedJSON(http.StatusOK, restaurants)
+	}
+}
+
+func GetAllCategories(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var categories []models.Category
+		result := db.Find(&categories)
+		if result.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching categories", "message": result.Error.Error()})
+			return
+		}
+		c.IndentedJSON(http.StatusOK, categories)
 	}
 }
