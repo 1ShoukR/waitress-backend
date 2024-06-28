@@ -26,3 +26,7 @@ func Haversine(lat1, lon1, lat2, lon2 float64) float64 {
 	distance := R * c
 	return distance
 }
+
+func StringPtr(s string) *string {
+	return &s
+}
