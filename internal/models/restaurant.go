@@ -95,6 +95,14 @@ type MenuItem struct {
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 }
 
+func (m *MenuItem) GetMenuItem(db *gorm.DB, menuId string) (*MenuItem, error) {
+	var menuItem MenuItem
+	if err := db.Where("menu_id = ?", menuId).First(&menuItem).Error; err != nil {
+		return nil, err
+	}
+	return &menuItem, nil
+}
+
 // Order represents an order record in the database.
 type Order struct {
 	OrderID       uint     `gorm:"primaryKey;autoIncrement:true"`
