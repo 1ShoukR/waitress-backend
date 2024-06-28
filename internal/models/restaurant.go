@@ -91,6 +91,7 @@ type MenuItem struct {
 	Price        *float64   // Pointer to allow nil (nullable)
 	IsAvailable  bool       `gorm:"default:true"`
 	Category     *string    // Pointer to allow nil (nullable)
+	ImageURL	 *string    // Pointer to allow nil (nullable)
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 }
 
