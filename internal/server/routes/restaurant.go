@@ -32,5 +32,6 @@ func RestaurantRoutes(router *gin.Engine, db *gorm.DB) {
 		restaurantRoutes.GET("/avgrating/:restaurantId", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetAvgRating(db, router))
 		restaurantRoutes.POST("/top10restaurants/", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetGlobalTopRestaurants(db, router))
 		restaurantRoutes.POST("/categories/get-all", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetAllCategories(db, router))
+		restaurantRoutes.POST("/menu/:menuItemId/get", utilities.UserRequired(authGroups, "Customer", "all"), handlers.GetMenuItem(db, router))
 	}
 }

@@ -194,6 +194,22 @@ func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	}
 }
 
+// Get's an individual menu item by ID
+func GetMenuItem(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		menuItemId := c.Param("menuItemId")
+		fmt.Printf("MenuItem ID: %s\n", menuItemId)
+		var menuItem models.MenuItem
+		results, err := menuItem.GetMenuItem(db, menuItemId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"Message": err.Error()})
+			return
+		}
+		fmt.Printf("results: %+v\n", results)
+		c.IndentedJSON(http.StatusOK, gin.H{"MenuItem": results})
+	}
+}
+
 // GetAvgRating is a handler for getting the average rating of a restaurant
 func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
