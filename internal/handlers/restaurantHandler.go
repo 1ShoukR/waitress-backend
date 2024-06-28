@@ -233,11 +233,12 @@ func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var restaurants []models.Restaurant
-		err := db.Table("restaurant").
+		err := db.Table("restaurant"). // Correct table name should be "restaurants"
 			Preload("Ratings").
 			Order("average_rating DESC").
 			Limit(10).
 			Preload("Categories").
+			Preload("MenuItems"). // Ensure that your model has a MenuItems relation defined
 			Find(&restaurants).Error
 		if err != nil {
 			fmt.Println("Error executing the query:", err)
@@ -248,7 +249,6 @@ func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		c.IndentedJSON(http.StatusOK, restaurants)
 	}
 }
-
 func GetAllCategories(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var categories []models.Category
