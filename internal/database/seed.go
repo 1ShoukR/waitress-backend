@@ -96,6 +96,63 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		{nil, nil, "mobile", `b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"`, nil, "iOS", "waitress-mobile-ios"},
 		{nil, nil, "mobile", `b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"`, nil, "Android", "waitress-mobile-android"},
 	}
+var mockMenuItems = map[string][]struct {
+	RestaurantID uint
+	NameOfItem   string
+	Price        float64
+	Category     string
+	IsAvailable  bool
+}{
+	"Appetizers": {
+		{RestaurantID: 1, NameOfItem: "Bruschetta", Price: 6.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 1, NameOfItem: "Spring Rolls", Price: 5.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 2, NameOfItem: "Caprese Salad", Price: 7.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 2, NameOfItem: "Garlic Bread", Price: 4.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 3, NameOfItem: "Edamame", Price: 5.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 3, NameOfItem: "Miso Soup", Price: 3.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 4, NameOfItem: "Nachos", Price: 8.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 4, NameOfItem: "Guacamole", Price: 6.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 5, NameOfItem: "Garlic Knots", Price: 5.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 5, NameOfItem: "Mozzarella Sticks", Price: 7.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 6, NameOfItem: "Spring Rolls", Price: 5.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 6, NameOfItem: "Potstickers", Price: 6.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 7, NameOfItem: "Egg Rolls", Price: 5.99, Category: "Appetizers", IsAvailable: true},
+		{RestaurantID: 7, NameOfItem: "Crab Rangoon", Price: 6.99, Category: "Appetizers", IsAvailable: true},
+	},
+	"Mains": {
+		{RestaurantID: 1, NameOfItem: "Spaghetti Carbonara", Price: 12.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 1, NameOfItem: "Sweet and Sour Chicken", Price: 10.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 1, NameOfItem: "Butter Chicken", Price: 11.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 2, NameOfItem: "Lasagna", Price: 13.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 2, NameOfItem: "Margherita Pizza", Price: 9.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 3, NameOfItem: "Sushi Platter", Price: 19.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 3, NameOfItem: "Tempura Udon", Price: 14.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 4, NameOfItem: "Taco Platter", Price: 11.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 4, NameOfItem: "Burrito", Price: 9.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 5, NameOfItem: "Pepperoni Pizza", Price: 11.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 5, NameOfItem: "BBQ Chicken Pizza", Price: 12.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 6, NameOfItem: "Kung Pao Chicken", Price: 12.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 6, NameOfItem: "Beef and Broccoli", Price: 11.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 7, NameOfItem: "Orange Chicken", Price: 10.99, Category: "Mains", IsAvailable: true},
+		{RestaurantID: 7, NameOfItem: "General Tso's Chicken", Price: 11.99, Category: "Mains", IsAvailable: true},
+	},
+	"Desserts": {
+		{RestaurantID: 1, NameOfItem: "Tiramisu", Price: 6.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 1, NameOfItem: "Mango Sticky Rice", Price: 5.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 2, NameOfItem: "Panna Cotta", Price: 7.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 2, NameOfItem: "Gelato", Price: 4.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 3, NameOfItem: "Mochi Ice Cream", Price: 5.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 3, NameOfItem: "Green Tea Cake", Price: 6.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 4, NameOfItem: "Churros", Price: 4.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 4, NameOfItem: "Flan", Price: 5.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 5, NameOfItem: "Cannoli", Price: 6.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 5, NameOfItem: "Tartufo", Price: 7.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 6, NameOfItem: "Fried Ice Cream", Price: 5.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 6, NameOfItem: "Sesame Balls", Price: 4.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 7, NameOfItem: "Fortune Cookies", Price: 2.99, Category: "Desserts", IsAvailable: true},
+		{RestaurantID: 7, NameOfItem: "Almond Cookies", Price: 3.99, Category: "Desserts", IsAvailable: true},
+	},
+}
 	users := []struct {
 		FirstName string
 		LastName  string
@@ -365,6 +422,21 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		}
 		data.ReservationID = table.TableID
 	}
+	for category, items := range mockMenuItems {
+		for _, item := range items {
+			menuItem := models.MenuItem{
+				RestaurantID: item.RestaurantID,
+				NameOfItem:   &item.NameOfItem,
+				Price:        &item.Price,
+				Category:     &category,
+				IsAvailable:  item.IsAvailable,
+			}
+			if err := tx.Create(&menuItem).Error; err != nil {
+				tx.Rollback()
+				return fmt.Errorf("failed to create menu item for restaurant %d: %v", item.RestaurantID, err)
+			}
+	}
+}
 
 	for _, r := range reservations {
 		reservation := models.Reservation{

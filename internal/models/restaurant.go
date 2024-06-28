@@ -36,25 +36,26 @@ type Category struct {
 
 // Restaurant represents a restaurant record in the database.
 type Restaurant struct {
-	RestaurantId   uint           `gorm:"primaryKey;autoIncrement:true"`
-	OwnerID        uint           `gorm:"not null"`
-	Name           string         `gorm:"size:255;not null"`
-	Address        string         `gorm:"size:255;not null"`
-	Phone          string         `gorm:"size:255;not null"`
-	Email          string         `gorm:"size:255;not null"`
+	RestaurantId    uint           `gorm:"primaryKey;autoIncrement:true"`
+	OwnerID         uint           `gorm:"not null"`
+	Name            string         `gorm:"size:255;not null"`
+	Address         string         `gorm:"size:255;not null"`
+	Phone           string         `gorm:"size:255;not null"`
+	Email           string         `gorm:"size:255;not null"`
 	Website        *string        // Pointer to allow nil (nullable)
-	Categories     []Category     `gorm:"many2many:restaurant_categories;"`
+	Categories      []Category     `gorm:"many2many:restaurant_categories;"`
 	NumberOfTables *int           // Pointer to allow nil (nullable)
 	Latitude       *float64       // Pointer to allow nil (nullable)
 	Longitude      *float64       // Pointer to allow nil (nullable)
-	Receipts       []Receipt      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
+	Receipts        []Receipt      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	Reservations   *[]Reservation `gorm:"foreignKey:RestaurantID"`
+	MenuItems	   *[]MenuItem    `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	Owner          User           `gorm:"foreignKey:OwnerID"`
 	Ratings        *[]Rating      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	ImageURL       *string        // Pointer to allow nil (nullable)
 	// Calculated fields
-	AverageRating float32 `gorm:"default:0"`
-	ReviewCount   *int    `gorm:"-"`
+	AverageRating   float32 `gorm:"default:0"`
+	ReviewCount    *int    `gorm:"-"`
 }
 
 // Rating represents a rating record in the database.
@@ -89,6 +90,7 @@ type MenuItem struct {
 	NameOfItem   *string    // Pointer to allow nil (nullable)
 	Price        *float64   // Pointer to allow nil (nullable)
 	IsAvailable  bool       `gorm:"default:true"`
+	Category     *string    // Pointer to allow nil (nullable)
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 }
 
