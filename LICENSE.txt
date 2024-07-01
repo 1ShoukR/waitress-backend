@@ -1,0 +1,11 @@
+Copyright (c) 2024 Kimchi & Kabob, LLC
+
+This code is the property of Kimchi & Kabob, LLC. It is provided for educational purposes only. You are free to view and learn from the code, but you are not permitted to:
+
+1. Copy or redistribute the code in any medium or format.
+2. Modify the code.
+3. Use the code in any way that is not expressly allowed by Kimchi & Kabob, LLC.
+
+Any use of the code in violation of these terms will result in legal action.
+
+For permissions beyond the scope of this license, please contact [Your Contact Information].
