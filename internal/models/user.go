@@ -42,6 +42,16 @@ type User struct {
 	ProfileImage  *string
 	Reservations  []Reservation `gorm:"foreignKey:UserID"`
 	Ratings       []Rating      `gorm:"foreignKey:UserID"`
+	Payments 	  []Payment     `gorm:"foreignKey:UserID"`
+}
+
+// Grab a user's payments based off signed in user session
+func (u *User) GetUserPayments(db *gorm.DB) ([]Payment, error) {
+	var payments []Payment
+	if err := db.Where("user_id = ?", u.UserID).Find(&payments).Error; err != nil {
+		return nil, err
+	}
+	return payments, nil
 }
 
 // UpdateAccountInformation is a method that updates the user's account information in the database.
