@@ -91,12 +91,13 @@ func RunAll(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Create tables in the correct order
 		if err := db.AutoMigrate(
+			&models.User{},
 			&models.APIClient{},
 			&models.Entity{},
-			&models.User{},
 			&models.Restaurant{},
 			&models.Rating{},
 			&models.Receipt{},
+			&models.Payment{},
 			&models.Reservation{},
 			&models.MenuItem{},
 			&models.Order{},
