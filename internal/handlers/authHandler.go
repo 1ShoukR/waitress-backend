@@ -110,11 +110,13 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		}
 		// If the password is correct, proceed with session handling
 		session := sessions.Default(c)
+		// Need to set onyl the user in the session, as well as the api token.
+		// Otherwise, the sessions are too large and will not be saved.
 		session.Set("userID", foundUser.UserID)
 		session.Set("apiToken", token)
 		session.Set("authType", foundUser.AuthType)
 		session.Set("clientType", userAgent)
-		session.Set("user", foundUser)
+		// session.Set("user", foundUser)
 		session.Set("loggedIn", true)
 		if err := session.Save(); err != nil {
 			log.Printf("Failed to save session: %v", err)
