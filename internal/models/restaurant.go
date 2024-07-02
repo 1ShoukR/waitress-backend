@@ -92,6 +92,7 @@ type MenuItem struct {
 	IsAvailable  bool       `gorm:"default:true"`
 	Category     *string    // Pointer to allow nil (nullable)
 	ImageURL	 *string    // Pointer to allow nil (nullable)
+	Description  *string    // Pointer to allow nil (nullable)
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 }
 
