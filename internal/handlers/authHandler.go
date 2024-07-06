@@ -27,6 +27,13 @@ import (
 	"gorm.io/gorm"
 )
 
+// LoginRequest is the struct that represents the request body for the login endpoint
+type LoginRequest struct {
+	Email     string `json:"email" form:"email"`
+	Password  string `json:"password" form:"password"`
+	UserAgent string `json:"userAgent" form:"userAgent"`
+}
+
 // Here is how you can access the JWT_SECRET environment variable
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
@@ -76,9 +83,19 @@ func Logout(db *gorm.DB) gin.HandlerFunc {
 // Login function to authenticate a user
 func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		email := c.PostForm("email")
-		password := c.PostForm("password")
-		userAgent := c.PostForm("userAgent")
+		var req LoginRequest
+		fmt.Println("Login request")
+		if err := c.ShouldBind(&req); err != nil {
+			fmt.Println("Error binding request")
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		email := req.Email
+		password := req.Password
+		userAgent := req.UserAgent
+		// log out the email password and userAgent
+		fmt.Printf("Received: email=%s, password=%s, userAgent=%s\n", email, password, userAgent)
 		var client models.APIClient
 		userClient := db.Find(&client, "client_type = ?", userAgent)
 		fmt.Println(userClient)
@@ -90,6 +107,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		var foundUser models.User
 		result := db.Preload("Entity").Where("email = ?", email).First(&foundUser)
 		if result.Error != nil {
+
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
 			} else {

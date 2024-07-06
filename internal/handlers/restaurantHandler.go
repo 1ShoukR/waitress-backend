@@ -40,31 +40,32 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 	}
 }
+type LocationRequest struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	ApiToken  string  `json:"apiToken"`
+}
 
 // GetLocalRestaurants is a handler for getting local restaurants based on user location
 func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var restaurants []models.Restaurant
-		userLatStr := c.PostForm("latitude")
-		userLongStr := c.PostForm("longitude")
-		apiToken := c.PostForm("apiToken")
-		fmt.Println("Received latitude:", userLatStr)
-		fmt.Println("Received longitude:", userLongStr)
+		var locationReq LocationRequest
+
+		if err := c.ShouldBindJSON(&locationReq); err != nil {
+			fmt.Println("Error binding JSON:", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+			return
+		}
+
+		userLat := locationReq.Latitude
+		userLong := locationReq.Longitude
+		apiToken := locationReq.ApiToken
+
 		fmt.Println("Received apiToken:", apiToken)
-		userLat, err := strconv.ParseFloat(userLatStr, 64)
-		if err != nil {
-			fmt.Println("Error parsing latitude:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid latitude"})
-			return
-		}
-		userLong, err := strconv.ParseFloat(userLongStr, 64)
-		if err != nil {
-			fmt.Println("Error parsing longitude:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude"})
-			return
-		}
+
 		maxDistance := 10000.0 // Max distance in meters, increase for testing
-		
+
 		// SQL query to calculate distance and filter restaurants
 		query := `
 			SELECT *, (
@@ -78,17 +79,19 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			ORDER BY distance
 		`
 		// Use raw SQL query to get nearby restaurants
-		err = db.Raw(query, userLat, userLong, userLat, maxDistance).Scan(&restaurants).Error
+		err := db.Raw(query, userLat, userLong, userLat, maxDistance).Scan(&restaurants).Error
 		if err != nil {
 			fmt.Println("Error executing the query:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching nearby restaurants"})
 			return
 		}
+
 		// Get the IDs of the filtered restaurants
 		var restaurantIDs []uint
 		for _, restaurant := range restaurants {
 			restaurantIDs = append(restaurantIDs, restaurant.RestaurantId)
 		}
+
 		// Retrieve restaurants with preloaded ratings based on the filtered restaurant IDs
 		err = db.Preload("Ratings").Preload("Categories").Where("restaurant_id IN (?)", restaurantIDs).Find(&restaurants).Error
 		if err != nil {
@@ -96,6 +99,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to preload ratings"})
 			return
 		}
+
 		if len(restaurants) == 0 {
 			fmt.Println("No nearby restaurants found within", maxDistance, "meters.")
 		} else {

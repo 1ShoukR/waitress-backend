@@ -48,6 +48,11 @@ func NewServer() *http.Server {
 	fmt.Printf("Store session: %v", store)
 	router := gin.Default()
 	router.Use(sessions.Sessions("mysession", store))
+	router.GET("/ping", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "pong",
+		})
+	})
 	newServer := &Server{
 		port:   port, // Initialize the port number here
 		db:     db, // Initialize the GORM database connection here
