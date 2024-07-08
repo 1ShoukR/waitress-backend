@@ -9,16 +9,18 @@
 // - GetAvgRating
 // - GetGlobalTopRestaurants
 
-
 package handlers
 
 import (
 	// "log"
 	// "errors"
+	// "bytes"
 	"fmt"
+	// "io"
 	"net/http"
 	"strconv"
 	"waitress-backend/internal/models"
+
 	// "waitress-backend/internal/utilities"
 
 	// "github.com/gin-contrib/sessions"
@@ -52,8 +54,9 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		var restaurants []models.Restaurant
 		var locationReq LocationRequest
 
-		if err := c.ShouldBindJSON(&locationReq); err != nil {
-			fmt.Println("Error binding JSON:", err)
+		// Bind form data
+		if err := c.ShouldBind(&locationReq); err != nil {
+			fmt.Println("Error binding form data:", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 			return
 		}
