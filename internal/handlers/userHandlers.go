@@ -11,10 +11,9 @@ package handlers
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
-
+	"fmt"
 	"golang.org/x/crypto/bcrypt"
 
 	// "waitress-backend/internal/handlers"
@@ -26,72 +25,68 @@ import (
 )
 
 // CreateUser is a handler for creating a new user account
+type CreateUserRequest struct {
+	Email     string  `json:"email" binding:"required"`
+	Password  string  `json:"password" binding:"required"`
+	FirstName string  `json:"firstName"`
+	LastName  string  `json:"lastName"`
+	UserType  string  `json:"userType"`
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+	Address   string  `json:"address"`
+	City      string  `json:"city"`
+	State     string  `json:"state"`
+	Zip       string  `json:"zip"`
+}
+
 func CreateUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		if err := c.Request.ParseForm(); err != nil {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid form data"})
+		var req CreateUserRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			fmt.Println("Error binding JSON:", err)
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid JSON data", "error": err.Error()})
 			return
 		}
-		for name, value := range c.Request.PostForm {
-			fmt.Println("name:", name)
-			fmt.Println(name, value)
-		}
-		email := c.PostForm("email")
-		password := c.PostForm("password")
-		firstName := c.PostForm("firstName")
-		lastName := c.PostForm("lastName")
-		userType := c.PostForm("userType")
-		latitude := c.PostForm("latitude")
-		longitude := c.PostForm("longitude")
-		address := c.PostForm("address")
-		city := c.PostForm("city")
-		state := c.PostForm("state")
-		zip := c.PostForm("zip")
-		if email == "" || password == "" {
-			c.IndentedJSON(http.StatusBadRequest, gin.H{"message": "Invalid login credentials"})
-			return
-		}
-		fmt.Println(email, password, firstName, lastName, userType, latitude, longitude, address, city, state, zip)
-		// hash the password
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error hashing password"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error hashing password"})
 			return
 		}
-		// Concatenate the address fields to create a single address string
+
 		var newUser models.User
-		fullUserAddress := address + ", " + city + ", " + state + " " + zip
-		newUser.Email = email
+		fullUserAddress := req.Address + ", " + req.City + ", " + req.State + " " + req.Zip
+		newUser.Email = req.Email
 		newUser.PasswordHash = string(hashedPassword)
-		newUser.Entity.FirstName = firstName
-		newUser.Entity.LastName = lastName
-		newUser.AuthType = userType
-		newUser.Latitude, _ = strconv.ParseFloat(latitude, 64)
-		newUser.Longitude, _ = strconv.ParseFloat(longitude, 64)
+		newUser.Entity.FirstName = req.FirstName
+		newUser.Entity.LastName = req.LastName
+		newUser.AuthType = req.UserType
+		newUser.Latitude = req.Latitude
+		newUser.Longitude = req.Longitude
 		newUser.Address = &fullUserAddress
 
-		// Create the user
 		if err := db.Create(&newUser).Error; err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating user"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error creating user"})
 			return
 		}
+
 		token, err := createToken(newUser.Email)
 		if err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating token"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error creating token"})
 			return
 		}
 		if err := verifyToken(token); err != nil {
-			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error verifying token"})
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error verifying token"})
 			return
 		}
-		c.IndentedJSON(http.StatusOK, gin.H{
+
+		c.JSON(http.StatusOK, gin.H{
 			"message": "User created successfully",
 			"user":    newUser,
 			"token":   token,
-	})
+		})
 	}
 }
-
 // GetUser is a handler for getting all users in the database
 func GetUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
