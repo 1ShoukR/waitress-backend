@@ -56,7 +56,7 @@ func (u *User) GetUserPayments(db *gorm.DB) ([]Payment, error) {
 
 // UpdateAccountInformation is a method that updates the user's account information in the database.
 func (user *User) UpdateAccountInformation(db *gorm.DB, firstName string, lastName string, email string, address string, city string, state string, zip string, phone string) (*User, error) {
-	userAddress := address 
+	userAddress := address
 	fmt.Println("Email: ", email)
 	fmt.Println("Phone: ", phone)
 	fmt.Println("Address: ", address)

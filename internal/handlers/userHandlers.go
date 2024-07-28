@@ -135,22 +135,38 @@ func UpdateUserLocation(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// UpdateAccountInfoRequest represents the JSON structure of the update account information request
+type UpdateAccountInfoRequest struct {
+	UserID    int    `json:"userId" binding:"required"`
+	FirstName string `json:"firstName" binding:"required"`
+	LastName  string `json:"lastName" binding:"required"`
+	Email     string `json:"email" binding:"required"`
+	Phone     string `json:"phone" binding:"required"`
+	Street    string `json:"street" binding:"required"`
+	City      string `json:"city" binding:"required"`
+	State     string `json:"state" binding:"required"`
+	Zip       string `json:"zip" binding:"required"`
+}
+
 // UpdateUserAccountInformation is a handler for updating a user's account information from the Edit Account page
 func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var foundUser models.User
-		userId := c.PostForm("userId")
-		firstName := c.PostForm("firstName")
-		lastName := c.PostForm("lastName")
-		email := c.PostForm("email")
-		phone := c.PostForm("phone")
-		street := c.PostForm("street")
-		city := c.PostForm("city")
-		state := c.PostForm("state")
-		zip := c.PostForm("zip")
-		address := street + ", " + city + ", " + state + " " + zip
+		var request UpdateAccountInfoRequest
 
-		result := db.Preload("Entity").Where("user_id = ?", userId).First(&foundUser)
+		// Bind the JSON directly to the struct
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			fmt.Println("Failed to bind JSON to struct: ", err)
+			return
+		}
+
+		// Log the struct for debugging
+		fmt.Printf("Parsed request struct: %+v\n", request)
+
+		var foundUser models.User
+		address := request.Street + ", " + request.City + ", " + request.State + " " + request.Zip
+
+		result := db.Preload("Entity").Where("user_id = ?", request.UserID).First(&foundUser)
 		if result.Error != nil {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				c.JSON(http.StatusNotFound, gin.H{"message": "User not found"})
@@ -161,7 +177,7 @@ func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Update user information
-		updatedUser, err := foundUser.UpdateAccountInformation(db, firstName, lastName, email, address, city, state, zip, phone); 
+		updatedUser, err := foundUser.UpdateAccountInformation(db, request.FirstName, request.LastName, request.Email, address, request.City, request.State, request.Zip, request.Phone)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
