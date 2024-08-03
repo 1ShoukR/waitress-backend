@@ -20,6 +20,7 @@ func UtilitiesRoutes(router *gin.Engine, db *gorm.DB) {
 	database := router.Group("api/db")
 	{
 		database.GET("/seed", utilities.UserRequired(authGroups, "Dev", "all"), handlers.Seed(db))
+		database.GET("/seedd", handlers.Seed(db))
 		database.GET("/run-all", handlers.RunAll(db))
 		database.GET("/migrate", handlers.MigrateDb(db))
 	}
