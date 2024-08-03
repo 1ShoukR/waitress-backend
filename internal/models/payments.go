@@ -14,7 +14,8 @@ type Payment struct {
 	Status            string     `gorm:"size:50;not null"` // e.g., 'pending', 'completed', 'failed'
 	PaymentMethod     string     `gorm:"size:50;not null"` // e.g., 'card', 'bank_transfer'
 	Description       string     `gorm:"size:255"`
-	CreatedAt         time.Time
+    CreatedAt         time.Time  `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+    UpdatedAt     	  time.Time  `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 	FinalizedAt       *time.Time
 	// Relationships
 	// User              User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`

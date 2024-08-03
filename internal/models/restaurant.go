@@ -72,8 +72,8 @@ type Rating struct {
 // Reservation represents a reservation record in the database.
 type Reservation struct {
 	ReservationID uint `gorm:"primaryKey;autoIncrement:true"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+    CreatedAt     time.Time      `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+    UpdatedAt     time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 	RestaurantID  uint           `gorm:"not null"`
 	UserID        uint           `gorm:"not null"`

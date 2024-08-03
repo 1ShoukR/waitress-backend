@@ -21,8 +21,8 @@ type Entity struct {
 	FirstName string `gorm:"size:255;not null"`
 	LastName  string `gorm:"size:255;not null"`
 	Type      string `gorm:"size:50"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+    CreatedAt time.Time      `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+    UpdatedAt time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
