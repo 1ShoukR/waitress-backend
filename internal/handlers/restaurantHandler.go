@@ -80,7 +80,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 					sin(radians(?)) * sin(radians(latitude))
 				)
 			) AS distance
-			FROM restaurants
+			FROM restaurant
 			HAVING distance < ?
 			ORDER BY distance
 		`
