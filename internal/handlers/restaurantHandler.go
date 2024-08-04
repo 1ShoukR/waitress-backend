@@ -66,11 +66,9 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		apiToken := locationReq.ApiToken
 
 		fmt.Println("Received apiToken:", apiToken)
-
-		maxDistance := 100000.0 // Max distance in meters, increase for testing. Will need to be dynamic based on user input.
-
-		// Debug user location
 		fmt.Printf("User location: Latitude: %f, Longitude: %f\n", userLat, userLong)
+
+		maxDistance := 100000.0 // Max distance in meters, increase for testing
 
 		// SQL query to calculate distance and filter restaurants
 		query := `
@@ -84,6 +82,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			HAVING distance < ?
 			ORDER BY distance
 		`
+		fmt.Printf("Query parameters: userLat=%f, userLong=%f, maxDistance=%f\n", userLat, userLong, maxDistance)
 		// Use raw SQL query to get nearby restaurants
 		err := db.Raw(query, userLat, userLong, userLat, maxDistance).Scan(&restaurants).Error
 		if err != nil {
@@ -94,8 +93,8 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 		// Debugging: Output the result of the distance calculation
 		for _, restaurant := range restaurants {
-			fmt.Printf("Restaurant: %s, Latitude: %f, Longitude: %f\n",
-				restaurant.Name, *restaurant.Latitude, *restaurant.Longitude)
+			fmt.Printf("Restaurant: %s, Latitude: %f, Longitude: %f,\n",
+				restaurant.Name, *restaurant.Latitude, *restaurant.Longitude,)
 		}
 
 		// Get the IDs of the filtered restaurants
