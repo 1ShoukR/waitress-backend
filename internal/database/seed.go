@@ -58,6 +58,19 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 	if err := tx.Error; err != nil {
 		return err
 	}
+	cities := map[string]struct {
+	BaseLat  float64
+	BaseLong float64
+}{
+	"New York":    {40.730610, -73.935242},
+	"Los Angeles": {34.052235, -118.243683},
+	"Chicago":     {41.878113, -87.629799},
+	"Houston":     {29.760427, -95.369804},
+	"Miami":       {25.761681, -80.191788},
+	"Atlanta":     {33.7490, -84.3880}, // Added Atlanta
+	"Cincinnati":  {39.1031, -84.5120},  // Added Cincinnati
+	"Toronto":     {43.651070, -79.347015}, // Added Toronto
+}
 	baseLat, baseLong := 40.730610, -73.935242 // Central coordinates for Manhattan
 	variance := 0.01
 	// Define the users with their passwords
@@ -108,51 +121,38 @@ var mockMenuItems = map[string][]struct {
 	"Appetizers": {
 		{RestaurantID: 1, NameOfItem: "Bruschetta", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1543332164-6e21c0da9852"), IsAvailable: true, Description: "Grilled bread topped with tomatoes, olive oil, and basil."},
 		{RestaurantID: 1, NameOfItem: "Spring Rolls", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1553621042-f6e147245754"), IsAvailable: true, Description: "Crispy rolls filled with vegetables and served with a dipping sauce."},
-		{RestaurantID: 2, NameOfItem: "Caprese Salad", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1582599798357-034b3e220e8c"), IsAvailable: true, Description: "Fresh mozzarella, tomatoes, and basil drizzled with balsamic glaze."},
-		{RestaurantID: 2, NameOfItem: "Garlic Bread", Price: 4.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1600718374535-cfcb3826ef86"), IsAvailable: true, Description: "Toasted bread with garlic butter and herbs."},
-		{RestaurantID: 3, NameOfItem: "Edamame", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1589308078055-98cda29db9a2"), IsAvailable: true, Description: "Steamed young soybeans sprinkled with sea salt."},
-		{RestaurantID: 3, NameOfItem: "Miso Soup", Price: 3.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1579935279003-f1b55a675f5b"), IsAvailable: true, Description: "Traditional Japanese soup with tofu, seaweed, and scallions."},
-		{RestaurantID: 4, NameOfItem: "Nachos", Price: 8.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1552332386-f8dd00dc2fdf"), IsAvailable: true, Description: "Tortilla chips topped with cheese, jalapeños, and sour cream."},
-		{RestaurantID: 4, NameOfItem: "Guacamole", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1614729232437-9c43db997277"), IsAvailable: true, Description: "Creamy avocado dip with tomatoes, onions, and lime."},
-		{RestaurantID: 5, NameOfItem: "Garlic Knots", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1605443809005-661ddce850db"), IsAvailable: true, Description: "Soft bread knots coated in garlic butter and Parmesan."},
-		{RestaurantID: 5, NameOfItem: "Mozzarella Sticks", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1587843098075-50b5f140d144"), IsAvailable: true, Description: "Fried cheese sticks served with marinara sauce."},
-		{RestaurantID: 6, NameOfItem: "Spring Rolls", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1553621042-f6e147245754"), IsAvailable: true, Description: "Crispy rolls filled with vegetables and served with a dipping sauce."},
-		{RestaurantID: 6, NameOfItem: "Potstickers", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1600692652769-97dbaa9f076b"), IsAvailable: true, Description: "Pan-fried dumplings filled with pork and vegetables."},
-		{RestaurantID: 7, NameOfItem: "Egg Rolls", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1579306503278-158e04f65a97"), IsAvailable: true, Description: "Crispy rolls filled with pork and vegetables, served with dipping sauce."},
-		{RestaurantID: 7, NameOfItem: "Crab Rangoon", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1601924582975-a2b41e2d6b70"), IsAvailable: true, Description: "Fried wontons filled with crab and cream cheese."},
+		{RestaurantID: 1, NameOfItem: "Garlic Bread", Price: 4.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1600718374535-cfcb3826ef86"), IsAvailable: true, Description: "Toasted bread with garlic butter and herbs."},
+		{RestaurantID: 1, NameOfItem: "Caprese Salad", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1582599798357-034b3e220e8c"), IsAvailable: true, Description: "Fresh mozzarella, tomatoes, and basil drizzled with balsamic glaze."},
+		{RestaurantID: 1, NameOfItem: "Mozzarella Sticks", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1587843098075-50b5f140d144"), IsAvailable: true, Description: "Fried cheese sticks served with marinara sauce."},
+		{RestaurantID: 1, NameOfItem: "Nachos", Price: 8.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1552332386-f8dd00dc2fdf"), IsAvailable: true, Description: "Tortilla chips topped with cheese, jalapeños, and sour cream."},
+		{RestaurantID: 1, NameOfItem: "Guacamole", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1614729232437-9c43db997277"), IsAvailable: true, Description: "Creamy avocado dip with tomatoes, onions, and lime."},
+		{RestaurantID: 1, NameOfItem: "Edamame", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1589308078055-98cda29db9a2"), IsAvailable: true, Description: "Steamed young soybeans sprinkled with sea salt."},
+		{RestaurantID: 1, NameOfItem: "Miso Soup", Price: 3.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1579935279003-f1b55a675f5b"), IsAvailable: true, Description: "Traditional Japanese soup with tofu, seaweed, and scallions."},
+		{RestaurantID: 1, NameOfItem: "Garlic Knots", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1605443809005-661ddce850db"), IsAvailable: true, Description: "Soft bread knots coated in garlic butter and Parmesan."},
 	},
 	"Mains": {
 		{RestaurantID: 1, NameOfItem: "Spaghetti Carbonara", Price: 12.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1603133872871-1a022d1d7598"), IsAvailable: true, Description: "Pasta with creamy egg sauce, pancetta, and Parmesan."},
 		{RestaurantID: 1, NameOfItem: "Sweet and Sour Chicken", Price: 10.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1617196032733-ff20765f4ec4"), IsAvailable: true, Description: "Fried chicken pieces in a sweet and tangy sauce with pineapple."},
 		{RestaurantID: 1, NameOfItem: "Butter Chicken", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1628599556752-57b752275e6f"), IsAvailable: true, Description: "Chicken cooked in a rich and creamy tomato sauce."},
-		{RestaurantID: 2, NameOfItem: "Lasagna", Price: 13.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1612197522785-f7b73361f76d"), IsAvailable: true, Description: "Layered pasta with beef, ricotta, mozzarella, and marinara sauce."},
-		{RestaurantID: 2, NameOfItem: "Margherita Pizza", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1564936289065-7bec5e0a8679"), IsAvailable: true, Description: "Classic pizza with fresh tomatoes, mozzarella, and basil."},
-		{RestaurantID: 3, NameOfItem: "Sushi Platter", Price: 19.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1586796675683-cdf2694b51e3"), IsAvailable: true, Description: "Assorted sushi rolls and nigiri with soy sauce and wasabi."},
-		{RestaurantID: 3, NameOfItem: "Tempura Udon", Price: 14.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1559925393-0d7fab0e337e"), IsAvailable: true, Description: "Udon noodles in broth with tempura shrimp and vegetables."},
-		{RestaurantID: 4, NameOfItem: "Taco Platter", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1620350168245-fd442b6c68e0"), IsAvailable: true, Description: "Assorted tacos with beef, chicken, and vegetarian options."},
-		{RestaurantID: 4, NameOfItem: "Burrito", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1606744825484-07a467c3cb43"), IsAvailable: true, Description: "Flour tortilla filled with rice, beans, meat, and toppings."},
-		{RestaurantID: 5, NameOfItem: "Pepperoni Pizza", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1580927752452-2a65d8a35d41"), IsAvailable: true, Description: "Classic pizza with pepperoni slices and mozzarella cheese."},
-		{RestaurantID: 5, NameOfItem: "BBQ Chicken Pizza", Price: 12.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1587206668054-0c6e7209f022"), IsAvailable: true, Description: "Pizza topped with BBQ chicken, red onions, and cilantro."},
-		{RestaurantID: 6, NameOfItem: "Kung Pao Chicken", Price: 12.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1578663749429-360ef96e754a"), IsAvailable: true, Description: "Stir-fried chicken with peanuts, vegetables, and chili peppers."},
-		{RestaurantID: 6, NameOfItem: "Beef and Broccoli", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1617204575425-2a10eab2eaf3"), IsAvailable: true, Description: "Tender beef and broccoli stir-fried in a savory sauce."},
-		{RestaurantID: 7, NameOfItem: "Orange Chicken", Price: 10.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1612008655725-e95f6f4a2d7a"), IsAvailable: true, Description: "Fried chicken pieces in a sweet and tangy orange sauce."},
-		{RestaurantID: 7, NameOfItem: "General Tso's Chicken", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1608476158130-485e5361d481"), IsAvailable: true, Description: "Spicy-sweet fried chicken with a hint of garlic and ginger."},
+		{RestaurantID: 1, NameOfItem: "Lasagna", Price: 13.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1612197522785-f7b73361f76d"), IsAvailable: true, Description: "Layered pasta with beef, ricotta, mozzarella, and marinara sauce."},
+		{RestaurantID: 1, NameOfItem: "Margherita Pizza", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1564936289065-7bec5e0a8679"), IsAvailable: true, Description: "Classic pizza with fresh tomatoes, mozzarella, and basil."},
+		{RestaurantID: 1, NameOfItem: "Sushi Platter", Price: 19.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1586796675683-cdf2694b51e3"), IsAvailable: true, Description: "Assorted sushi rolls and nigiri with soy sauce and wasabi."},
+		{RestaurantID: 1, NameOfItem: "Tempura Udon", Price: 14.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1559925393-0d7fab0e337e"), IsAvailable: true, Description: "Udon noodles in broth with tempura shrimp and vegetables."},
+		{RestaurantID: 1, NameOfItem: "Taco Platter", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1620350168245-fd442b6c68e0"), IsAvailable: true, Description: "Assorted tacos with beef, chicken, and vegetarian options."},
+		{RestaurantID: 1, NameOfItem: "Burrito", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1606744825484-07a467c3cb43"), IsAvailable: true, Description: "Flour tortilla filled with rice, beans, meat, and toppings."},
+		{RestaurantID: 1, NameOfItem: "Pepperoni Pizza", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1580927752452-2a65d8a35d41"), IsAvailable: true, Description: "Classic pizza with pepperoni slices and mozzarella cheese."},
 	},
 	"Desserts": {
 		{RestaurantID: 1, NameOfItem: "Tiramisu", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1589794236195-82c16d4455a7"), IsAvailable: true, Description: "Italian dessert with layers of coffee-soaked ladyfingers and mascarpone."},
 		{RestaurantID: 1, NameOfItem: "Mango Sticky Rice", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1578985545062-69928b1d9587"), IsAvailable: true, Description: "Sweet sticky rice served with ripe mango slices and coconut milk."},
-		{RestaurantID: 2, NameOfItem: "Panna Cotta", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1570197781624-a7d82cf17a0b"), IsAvailable: true, Description: "Creamy Italian dessert topped with berry compote."},
-		{RestaurantID: 2, NameOfItem: "Gelato", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1592194996308-fd639ceef400"), IsAvailable: true, Description: "Rich and creamy Italian ice cream available in various flavors."},
-		{RestaurantID: 3, NameOfItem: "Mochi Ice Cream", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1578685728484-a62bb8dca36d"), IsAvailable: true, Description: "Japanese rice cake filled with ice cream."},
-		{RestaurantID: 3, NameOfItem: "Green Tea Cake", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1622837276333-56005ea65832"), IsAvailable: true, Description: "Moist cake infused with green tea flavor and topped with frosting."},
-		{RestaurantID: 4, NameOfItem: "Churros", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1612215859368-c51012b48a02"), IsAvailable: true, Description: "Fried dough pastries dusted with cinnamon sugar."},
-		{RestaurantID: 4, NameOfItem: "Flan", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1604335399108-ec88ddedc62e"), IsAvailable: true, Description: "Creamy caramel custard dessert."},
-		{RestaurantID: 5, NameOfItem: "Cannoli", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1601412436969-7c6cfa6b84e5"), IsAvailable: true, Description: "Crispy pastry shells filled with sweet ricotta cream."},
-		{RestaurantID: 5, NameOfItem: "Tartufo", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1610018282465-4ef09aa6069e"), IsAvailable: true, Description: "Chocolate-coated ice cream with a cherry and almond center."},
-		{RestaurantID: 6, NameOfItem: "Fried Ice Cream", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1559984802-c58c23f8f5a0"), IsAvailable: true, Description: "Ice cream coated in a crispy shell and fried to perfection."},
-		{RestaurantID: 6, NameOfItem: "Sesame Balls", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1582057302067-4ca1a1ea6e53"), IsAvailable: true, Description: "Sweet rice flour balls coated with sesame seeds and filled with red bean paste."},
-		{RestaurantID: 7, NameOfItem: "Fortune Cookies", Price: 2.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1626986331763-2649bc2ab575"), IsAvailable: true, Description: "Crispy cookies with a hidden fortune inside."},
-		{RestaurantID: 7, NameOfItem: "Almond Cookies", Price: 3.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1590487983833-15d848a5f973"), IsAvailable: true, Description: "Crunchy cookies with a delicate almond flavor."},
+		{RestaurantID: 1, NameOfItem: "Panna Cotta", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1570197781624-a7d82cf17a0b"), IsAvailable: true, Description: "Creamy Italian dessert topped with berry compote."},
+		{RestaurantID: 1, NameOfItem: "Gelato", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1592194996308-fd639ceef400"), IsAvailable: true, Description: "Rich and creamy Italian ice cream available in various flavors."},
+		{RestaurantID: 1, NameOfItem: "Mochi Ice Cream", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1578685728484-a62bb8dca36d"), IsAvailable: true, Description: "Japanese rice cake filled with ice cream."},
+		{RestaurantID: 1, NameOfItem: "Green Tea Cake", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1622837276333-56005ea65832"), IsAvailable: true, Description: "Moist cake infused with green tea flavor and topped with frosting."},
+		{RestaurantID: 1, NameOfItem: "Churros", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1612215859368-c51012b48a02"), IsAvailable: true, Description: "Fried dough pastries dusted with cinnamon sugar."},
+		{RestaurantID: 1, NameOfItem: "Flan", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1604335399108-ec88ddedc62e"), IsAvailable: true, Description: "Creamy caramel custard dessert."},
+		{RestaurantID: 1, NameOfItem: "Cannoli", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1601412436969-7c6cfa6b84e5"), IsAvailable: true, Description: "Crispy pastry shells filled with sweet ricotta cream."},
+		{RestaurantID: 1, NameOfItem: "Tartufo", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1610018282465-4ef09aa6069e"), IsAvailable: true, Description: "Chocolate-coated ice cream with a cherry and almond center."},
 	},
 }
 	users := []struct {
@@ -164,6 +164,8 @@ var mockMenuItems = map[string][]struct {
 		Address   string
 	}{
 		{"Engineer", "Developer", "engineer@test.com", "Test123!", "dev", "123 Broadway St, New York, NY 10006"},
+		{"Engineer2", "Developer2", "engineer2@test.com", "Test123!", "dev", "123 Broadway St, New York, NY 10006"},
+		{"Engineer3", "Developer3", "engineer3@test.com", "Test123!", "dev", "123 Broadway St, New York, NY 10006"},
 		{"Rahmin", "Shoukoohi", "rahminshoukoohi@gmail.com", "Test123!", "admin_super", "456 Park Ave, New York, NY 10022"},
 		{"Jane", "Smith", "janesmith@example.com", "Test123!", "admin_super", "789 West St, New York, NY 10014"},
 		{"Alice", "Johnson", "alicejohnson@example.com", "Test123!", "admin_super", "321 East St, New York, NY 10028"},
@@ -196,6 +198,15 @@ var mockMenuItems = map[string][]struct {
 		{"Mexican", "https://images.unsplash.com/photo-1629793980446-192d630f0dbe?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWV4aWNhbiUyMGZvb2R8ZW58MHx8MHx8fDA%3D"},
 		{"Pizza", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=2581&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
 		{"Chinese", "https://images.unsplash.com/photo-1585032226651-759b368d7246?q=80&w=2584&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Bar", "https://images.unsplash.com/photo-1592918620000-4b4c1ee6d4d8?q=80&w=2560&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Seafood", "https://images.unsplash.com/photo-1589910045204-cfea789d118b?q=80&w=2736&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Fast Food", "https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=2560&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Steakhouse", "https://images.unsplash.com/photo-1561047029-0d6de6b66af6?q=80&w=2736&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Healthy", "https://images.unsplash.com/photo-1550304943-4f24f54ddde9?q=80&w=2736&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Vegan", "https://images.unsplash.com/photo-1560807707-8cc77767d783?q=80&w=2736&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"BBQ", "https://images.unsplash.com/photo-1532634896-26909d0d4b9e?q=80&w=2736&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Southern", "https://images.unsplash.com/photo-1600596548778-9f8b1a14d94e?q=80&w=2560&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
+		{"Desserts", "https://images.unsplash.com/photo-1599785209790-4d146af6db72?q=80&w=2560&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"},
 	}
 
 	const (
@@ -214,32 +225,100 @@ var mockMenuItems = map[string][]struct {
 		Email       string
 		NumOfTables int
 		OwnerEmail  string
-		Latitude    float64
-		Longitude   float64
 		ImageURL    string
 		Categories  []models.Category
+		City        string
 	}{
-		{"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", 0, 0, grillHouseImage,
-			[]models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}},
-
-		{"Pasta Paradise", "456 Pasta Lane", "456-789-0123", "info@pastaparadise.com", rand.Intn(91) + 10, "janesmith@example.com", 0, 0, pastaparadise,
-			[]models.Category{{CategoryName: "Italian"}}},
-
-		{"Sushi World", "789 Sushi Blvd", "789-012-3456", "contact@sushiworld.com", rand.Intn(91) + 10, "alicejohnson@example.com", 0, 0, sushiworld,
-			[]models.Category{{CategoryName: "Japanese"}, {CategoryName: "American"}, {CategoryName: "Fast Food"}}},
-
-		{"Taco Land", "101 Taco Way", "234-567-8901", "hello@tacoland.com", rand.Intn(91) + 10, "bobbrown@example.com", 0, 0, tacoland,
-			[]models.Category{{CategoryName: "Mexican"}}},
-
-		{"Pizza Central", "321 Pizza Street", "567-890-1234", "info@pizzacentral.com", rand.Intn(91) + 10, "caroldavis@example.com", 0, 0, pizzacentral,
-			[]models.Category{{CategoryName: "Pizza"}, {CategoryName: "Fast Food"}}},
-
-		{"Chicken Central", "321 Chicken Street", "123-323-1234", "info@chickencentral.com", rand.Intn(91) + 10, "davidwilson@example.com", 0, 0, chickencentral,
-			[]models.Category{{CategoryName: "Chinese"}}},
-
-		{"Panda Express", "321 Panda Street", "664-353-1234", "info@pandaexpress.com", rand.Intn(91) + 10, "evemiller@example.com", 0, 0, pandaexpress,
-			[]models.Category{{CategoryName: "Chinese"}, {CategoryName: "Fast Food"}}},
+		// New York
+		{"Grill House", "123 Main St", "123-456-7890", "contact@grillhouse.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "New York"},
+		{"Pasta Heaven", "234 Pasta Lane", "234-567-8901", "info@pastaheaven.com", rand.Intn(91) + 10, "janesmith@example.com", "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae", []models.Category{{CategoryName: "Italian"}}, "New York"},
+		{"Sushi World", "345 Sushi Blvd", "345-678-9012", "contact@sushiworld.com", rand.Intn(91) + 10, "alicejohnson@example.com", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0", []models.Category{{CategoryName: "Japanese"}, {CategoryName: "Seafood"}}, "New York"},
+		{"Taco Fiesta", "456 Taco Way", "456-789-0123", "hello@tacofiesta.com", rand.Intn(91) + 10, "bobbrown@example.com", "https://images.unsplash.com/photo-1551218808-94e220e084d2", []models.Category{{CategoryName: "Mexican"}}, "New York"},
+		{"Pizza Palace", "567 Pizza St", "567-890-1234", "info@pizzapalace.com", rand.Intn(91) + 10, "caroldavis@example.com", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", []models.Category{{CategoryName: "Pizza"}, {CategoryName: "Italian"}}, "New York"},
+		{"Burger Town", "678 Burger Ave", "678-901-2345", "contact@burgertown.com", rand.Intn(91) + 10, "davidwilson@example.com", "https://images.unsplash.com/photo-1603133872871-1a022d1d7598", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "New York"},
+		{"Steakhouse Grill", "789 Steakhouse Rd", "789-012-3456", "info@steakhousegrill.com", rand.Intn(91) + 10, "evemiller@example.com", "https://images.unsplash.com/photo-1543332164-6e21c0da9852", []models.Category{{CategoryName: "American"}, {CategoryName: "Steakhouse"}}, "New York"},
+		{"Vegan Delight", "890 Vegan Ln", "890-123-4567", "hello@vegandelight.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1560807707-8cc77767d783", []models.Category{{CategoryName: "Vegan"}, {CategoryName: "Healthy"}}, "New York"},
+		{"Seafood Paradise", "901 Ocean Blvd", "901-234-5678", "contact@seafoodparadise.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "New York"},
+		{"Dessert Haven", "123 Sweet St", "123-345-6789", "info@desserthaven.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "New York"},
+		// Los Angeles
+		{"Sunset Grill", "234 Sunset Blvd", "213-456-7890", "contact@sunsetgrill.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", "https://images.unsplash.com/photo-1590487983833-15d848a5f973", []models.Category{{CategoryName: "American"}, {CategoryName: "Bar"}}, "Los Angeles"},
+		{"La Pasta", "345 Pasta Rd", "323-567-8901", "info@lapasta.com", rand.Intn(91) + 10, "janesmith@example.com", "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae", []models.Category{{CategoryName: "Italian"}}, "Los Angeles"},
+		{"Sushi Zen", "456 Sushi Ave", "424-678-9012", "contact@sushizen.com", rand.Intn(91) + 10, "alicejohnson@example.com", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0", []models.Category{{CategoryName: "Japanese"}}, "Los Angeles"},
+		{"Taco Loco", "567 Taco Blvd", "213-789-0123", "hello@tacoloco.com", rand.Intn(91) + 10, "bobbrown@example.com", "https://images.unsplash.com/photo-1551218808-94e220e084d2", []models.Category{{CategoryName: "Mexican"}}, "Los Angeles"},
+		{"Pizza Villa", "678 Pizza St", "323-890-1234", "info@pizzavilla.com", rand.Intn(91) + 10, "caroldavis@example.com", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", []models.Category{{CategoryName: "Pizza"}, {CategoryName: "Italian"}}, "Los Angeles"},
+		{"Burger Hub", "789 Burger Rd", "424-901-2345", "contact@burgerhub.com", rand.Intn(91) + 10, "davidwilson@example.com", "https://images.unsplash.com/photo-1603133872871-1a022d1d7598", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "Los Angeles"},
+		{"Steakhouse Prime", "890 Steakhouse Blvd", "213-012-3456", "info@steakhouseprime.com", rand.Intn(91) + 10, "evemiller@example.com", "https://images.unsplash.com/photo-1543332164-6e21c0da9852", []models.Category{{CategoryName: "American"}, {CategoryName: "Steakhouse"}}, "Los Angeles"},
+		{"Vegan Bites", "901 Vegan Rd", "323-123-4567", "hello@veganbites.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1560807707-8cc77767d783", []models.Category{{CategoryName: "Vegan"}, {CategoryName: "Healthy"}}, "Los Angeles"},
+		{"Seafood Shack", "123 Ocean Blvd", "424-234-5678", "contact@seafoodshack.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "Los Angeles"},
+		{"Sweet Delights", "234 Dessert Ave", "213-345-6789", "info@sweetdelights.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "Los Angeles"},
+		// Chicago
+		{"Windy City Grill", "345 Windy St", "312-456-7890", "contact@windycitygrill.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", []models.Category{{CategoryName: "American"}, {CategoryName: "Bar"}}, "Chicago"},
+		{"Pasta Perfection", "456 Pasta Blvd", "773-567-8901", "info@pastaperfection.com", rand.Intn(91) + 10, "janesmith@example.com", "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae", []models.Category{{CategoryName: "Italian"}}, "Chicago"},
+		{"Sushi Spot", "567 Sushi Ave", "312-678-9012", "contact@sushispot.com", rand.Intn(91) + 10, "alicejohnson@example.com", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0", []models.Category{{CategoryName: "Japanese"}}, "Chicago"},
+		{"Taco Territory", "678 Taco St", "773-789-0123", "hello@tacoterritory.com", rand.Intn(91) + 10, "bobbrown@example.com", "https://images.unsplash.com/photo-1551218808-94e220e084d2", []models.Category{{CategoryName: "Mexican"}}, "Chicago"},
+		{"Pizza Place", "789 Pizza Rd", "312-890-1234", "info@pizzaplace.com", rand.Intn(91) + 10, "caroldavis@example.com", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", []models.Category{{CategoryName: "Pizza"}, {CategoryName: "Italian"}}, "Chicago"},
+		{"Burger Joint", "890 Burger Blvd", "773-901-2345", "contact@burgerjoint.com", rand.Intn(91) + 10, "davidwilson@example.com", "https://images.unsplash.com/photo-1603133872871-1a022d1d7598", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "Chicago"},
+		{"Prime Steakhouse", "901 Steakhouse St", "312-012-3456", "info@primesteakhouse.com", rand.Intn(91) + 10, "evemiller@example.com", "https://images.unsplash.com/photo-1543332164-6e21c0da9852", []models.Category{{CategoryName: "American"}, {CategoryName: "Steakhouse"}}, "Chicago"},
+		{"Green Eats", "123 Vegan Blvd", "773-123-4567", "hello@greeneats.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1560807707-8cc77767d783", []models.Category{{CategoryName: "Vegan"}, {CategoryName: "Healthy"}}, "Chicago"},
+		{"Seafood Sensation", "234 Ocean Ave", "312-234-5678", "contact@seafoodsensation.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "Chicago"},
+		{"Dessert Dreams", "345 Sweet St", "773-345-6789", "info@dessertdreams.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "Chicago"},
+		// Houston
+		{"Bayou Grill", "456 Bayou Blvd", "713-456-7890", "contact@bayougrill.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", []models.Category{{CategoryName: "American"}, {CategoryName: "Bar"}}, "Houston"},
+		{"Pasta Delights", "567 Pasta Ave", "832-567-8901", "info@pastadelights.com", rand.Intn(91) + 10, "janesmith@example.com", "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae", []models.Category{{CategoryName: "Italian"}}, "Houston"},
+		{"Sushi House", "678 Sushi St", "713-678-9012", "contact@sushihouse.com", rand.Intn(91) + 10, "alicejohnson@example.com", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0", []models.Category{{CategoryName: "Japanese"}}, "Houston"},
+		{"Taco Town", "789 Taco Blvd", "832-789-0123", "hello@tacotown.com", rand.Intn(91) + 10, "bobbrown@example.com", "https://images.unsplash.com/photo-1551218808-94e220e084d2", []models.Category{{CategoryName: "Mexican"}}, "Houston"},
+		{"Pizza Zone", "890 Pizza Ave", "713-890-1234", "info@pizzazone.com", rand.Intn(91) + 10, "caroldavis@example.com", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", []models.Category{{CategoryName: "Pizza"}, {CategoryName: "Italian"}}, "Houston"},
+		{"Burger King", "901 Burger St", "832-901-2345", "contact@burgerking.com", rand.Intn(91) + 10, "davidwilson@example.com", "https://images.unsplash.com/photo-1603133872871-1a022d1d7598", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "Houston"},
+		{"Texas Steakhouse", "123 Steakhouse Blvd", "713-012-3456", "info@texassteakhouse.com", rand.Intn(91) + 10, "evemiller@example.com", "https://images.unsplash.com/photo-1543332164-6e21c0da9852", []models.Category{{CategoryName: "American"}, {CategoryName: "Steakhouse"}}, "Houston"},
+		{"Vegan Village", "234 Vegan Ave", "832-123-4567", "hello@veganvillage.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1560807707-8cc77767d783", []models.Category{{CategoryName: "Vegan"}, {CategoryName: "Healthy"}}, "Houston"},
+		{"Seafood Market", "345 Ocean St", "713-234-5678", "contact@seafoodmarket.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "Houston"},
+		{"Sugar Heaven", "456 Sweet Blvd", "832-345-6789", "info@sugarheaven.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "Houston"},
+		// Miami
+		{"Ocean Grill", "567 Ocean Blvd", "305-456-7890", "contact@oceangrill.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", []models.Category{{CategoryName: "American"}, {CategoryName: "Seafood"}}, "Miami"},
+		{"Pasta Breeze", "678 Pasta Ave", "786-567-8901", "info@pastabreeze.com", rand.Intn(91) + 10, "janesmith@example.com", "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae", []models.Category{{CategoryName: "Italian"}}, "Miami"},
+		{"Sushi Bay", "789 Sushi St", "305-678-9012", "contact@sushibay.com", rand.Intn(91) + 10, "alicejohnson@example.com", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0", []models.Category{{CategoryName: "Japanese"}}, "Miami"},
+		{"Taco Beach", "890 Taco Blvd", "786-789-0123", "hello@tacobeach.com", rand.Intn(91) + 10, "bobbrown@example.com", "https://images.unsplash.com/photo-1551218808-94e220e084d2", []models.Category{{CategoryName: "Mexican"}}, "Miami"},
+		{"Pizza Tropics", "901 Pizza Ave", "305-890-1234", "info@pizzatropics.com", rand.Intn(91) + 10, "caroldavis@example.com", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", []models.Category{{CategoryName: "Pizza"}, {CategoryName: "Italian"}}, "Miami"},
+		{"Burger Bay", "123 Burger St", "786-901-2345", "contact@burgerbay.com", rand.Intn(91) + 10, "davidwilson@example.com", "https://images.unsplash.com/photo-1603133872871-1a022d1d7598", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "Miami"},
+		{"Steakhouse Deluxe", "234 Steakhouse Blvd", "305-012-3456", "info@steakhousedeluxe.com", rand.Intn(91) + 10, "evemiller@example.com", "https://images.unsplash.com/photo-1543332164-6e21c0da9852", []models.Category{{CategoryName: "American"}, {CategoryName: "Steakhouse"}}, "Miami"},
+		{"Vegan Paradise", "345 Vegan Ave", "786-123-4567", "hello@veganparadise.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1560807707-8cc77767d783", []models.Category{{CategoryName: "Vegan"}, {CategoryName: "Healthy"}}, "Miami"},
+		{"Seafood Delight", "456 Ocean Blvd", "305-234-5678", "contact@seafooddelight.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "Miami"},
+		{"Dessert Island", "567 Sweet St", "786-345-6789", "info@dessertisland.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "Miami"},
+		// Atlanta
+		{"Southern Comfort", "456 Peach St", "678-999-8212", "contact@southerncomfort.com", rand.Intn(91) + 10, "nathanfrost2024@example.com", "https://images.unsplash.com/photo-1542567456-9f443af6fa3d", []models.Category{{CategoryName: "American"}, {CategoryName: "Southern"}}, "Atlanta"},
+		{"BBQ Haven", "789 BBQ Blvd", "404-555-1234", "info@bbqhaven.com", rand.Intn(91) + 10, "ellahunt2024@example.com", "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c", []models.Category{{CategoryName: "BBQ"}, {CategoryName: "American"}}, "Atlanta"},
+		{"Peach Delight", "101 Peachy Way", "678-555-9876", "hello@peachdelight.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1504674900247-0877df9cc836", []models.Category{{CategoryName: "Desserts"}, {CategoryName: "American"}}, "Atlanta"},
+		{"Soul Food Express", "202 Soul St", "404-777-0001", "info@soulfoodexpress.com", rand.Intn(91) + 10, "milesbennett2024@example.com", "https://images.unsplash.com/photo-1506354666786-959d6d497f1a", []models.Category{{CategoryName: "American"}, {CategoryName: "Southern"}}, "Atlanta"},
+		{"Fried Chicken Heaven", "303 Chicken Blvd", "678-888-2222", "contact@friedchickenheaven.com", rand.Intn(91) + 10, "oliviagreenwood2024@example.com", "https://images.unsplash.com/photo-1562967916-eb82221dfb44", []models.Category{{CategoryName: "American"}, {CategoryName: "Southern"}}, "Atlanta"},
+		{"Grits & Greens", "404 Grits St", "404-666-3333", "hello@gritsandgreens.com", rand.Intn(91) + 10, "nathanfrost2024@example.com", "https://images.unsplash.com/photo-1598514988171-56eabb8c0546", []models.Category{{CategoryName: "American"}, {CategoryName: "Southern"}}, "Atlanta"},
+		{"Peach Cobbler Paradise", "505 Peach Blvd", "678-777-4444", "info@peachcobblerparadise.com", rand.Intn(91) + 10, "ellahunt2024@example.com", "https://images.unsplash.com/photo-1602517122333-ae12a60139a3", []models.Category{{CategoryName: "Desserts"}, {CategoryName: "American"}}, "Atlanta"},
+		{"Atlanta BBQ", "606 BBQ Ave", "404-555-5555", "contact@atlantabbq.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c", []models.Category{{CategoryName: "BBQ"}, {CategoryName: "American"}}, "Atlanta"},
+		{"Hotlanta Wings", "707 Wing St", "678-666-6666", "info@hotlantawings.com", rand.Intn(91) + 10, "milesbennett2024@example.com", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "Atlanta"},
+		{"Peach Blossom", "808 Blossom Blvd", "404-777-7777", "hello@peachblossom.com", rand.Intn(91) + 10, "oliviagreenwood2024@example.com", "https://images.unsplash.com/photo-1504674900247-0877df9cc836", []models.Category{{CategoryName: "Desserts"}, {CategoryName: "American"}}, "Atlanta"},
+		// Cincinnati
+		{"Cincy Grill", "123 Main St", "513-456-7890", "contact@cincygrill.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", []models.Category{{CategoryName: "American"}, {CategoryName: "Bar"}}, "Cincinnati"},
+		{"Skyline Pasta", "234 Pasta Lane", "513-567-8901", "info@skylinepasta.com", rand.Intn(91) + 10, "janesmith@example.com", "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae", []models.Category{{CategoryName: "Italian"}}, "Cincinnati"},
+		{"Riverfront Sushi", "345 Sushi Blvd", "513-678-9012", "contact@riverfrontsushi.com", rand.Intn(91) + 10, "alicejohnson@example.com", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0", []models.Category{{CategoryName: "Japanese"}}, "Cincinnati"},
+		{"Queen City Tacos", "456 Taco Way", "513-789-0123", "hello@queencitytacos.com", rand.Intn(91) + 10, "bobbrown@example.com", "https://images.unsplash.com/photo-1551218808-94e220e084d2", []models.Category{{CategoryName: "Mexican"}}, "Cincinnati"},
+		{"Pizza Junction", "567 Pizza St", "513-890-1234", "info@pizzajunction.com", rand.Intn(91) + 10, "caroldavis@example.com", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", []models.Category{{CategoryName: "Pizza"}, {CategoryName: "Italian"}}, "Cincinnati"},
+		{"Burger Palace", "678 Burger Ave", "513-901-2345", "contact@burgerpalace.com", rand.Intn(91) + 10, "davidwilson@example.com", "https://images.unsplash.com/photo-1603133872871-1a022d1d7598", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "Cincinnati"},
+		{"Steakhouse on the Square", "789 Steakhouse Rd", "513-012-3456", "info@steakhousesquare.com", rand.Intn(91) + 10, "evemiller@example.com", "https://images.unsplash.com/photo-1543332164-6e21c0da9852", []models.Category{{CategoryName: "American"}, {CategoryName: "Steakhouse"}}, "Cincinnati"},
+		{"Cincy Vegan Cafe", "890 Vegan Ln", "513-123-4567", "hello@cincyvegancafe.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1560807707-8cc77767d783", []models.Category{{CategoryName: "Vegan"}, {CategoryName: "Healthy"}}, "Cincinnati"},
+		{"Ohio River Seafood", "901 Ocean Blvd", "513-234-5678", "contact@ohioriverseafood.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "Cincinnati"},
+		{"Cincy Sweet Treats", "123 Sweet St", "513-345-6789", "info@cincysweettreats.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "Cincinnati"},
+		// Toronto
+		{"Toronto Grill", "123 Main St", "416-456-7890", "contact@torontogrill.com", rand.Intn(91) + 10, "rahminshoukoohi@gmail.com", "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4", []models.Category{{CategoryName: "American"}, {CategoryName: "Bar"}}, "Toronto"},
+		{"Pasta Fresca", "234 Pasta Lane", "416-567-8901", "info@pastafresca.com", rand.Intn(91) + 10, "janesmith@example.com", "https://images.unsplash.com/photo-1537047902294-62a40c20a6ae", []models.Category{{CategoryName: "Italian"}}, "Toronto"},
+		{"Sushi Bay", "345 Sushi Blvd", "416-678-9012", "contact@sushibay.com", rand.Intn(91) + 10, "alicejohnson@example.com", "https://images.unsplash.com/photo-1414235077428-338989a2e8c0", []models.Category{{CategoryName: "Japanese"}}, "Toronto"},
+		{"Taco Fiesta", "456 Taco Way", "416-789-0123", "hello@tacofiesta.com", rand.Intn(91) + 10, "bobbrown@example.com", "https://images.unsplash.com/photo-1551218808-94e220e084d2", []models.Category{{CategoryName: "Mexican"}}, "Toronto"},
+		{"Pizza Nova", "567 Pizza St", "416-890-1234", "info@pizzanova.com", rand.Intn(91) + 10, "caroldavis@example.com", "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38", []models.Category{{CategoryName: "Pizza"}, {CategoryName: "Italian"}}, "Toronto"},
+		{"Burger Spot", "678 Burger Ave", "416-901-2345", "contact@burgerspot.com", rand.Intn(91) + 10, "davidwilson@example.com", "https://images.unsplash.com/photo-1603133872871-1a022d1d7598", []models.Category{{CategoryName: "American"}, {CategoryName: "Fast Food"}}, "Toronto"},
+		{"Steakhouse Prime", "789 Steakhouse Rd", "416-012-3456", "info@steakhouseprime.com", rand.Intn(91) + 10, "evemiller@example.com", "https://images.unsplash.com/photo-1543332164-6e21c0da9852", []models.Category{{CategoryName: "American"}, {CategoryName: "Steakhouse"}}, "Toronto"},
+		{"Vegan Delight", "890 Vegan Ln", "416-123-4567", "hello@vegandelight.com", rand.Intn(91) + 10, "lucaswright2024@example.com", "https://images.unsplash.com/photo-1560807707-8cc77767d783", []models.Category{{CategoryName: "Vegan"}, {CategoryName: "Healthy"}}, "Toronto"},
+		{"Seafood Heaven", "901 Ocean Blvd", "416-234-5678", "contact@seafoodheaven.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "Toronto"},
+		{"Toronto Sweets", "123 Sweet St", "416-345-6789", "info@torontosweets.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "Toronto"},
 	}
+
 
 	ratings := []struct {
 		Comment      string
@@ -368,7 +447,6 @@ var mockMenuItems = map[string][]struct {
 	}
 
 	for _, data := range restaurantData {
-
 		var categories []models.Category
 
 		for _, category := range data.Categories {
@@ -380,7 +458,13 @@ var mockMenuItems = map[string][]struct {
 			categories = append(categories, c)
 		}
 
-		lat, long := generateGeolocation(baseLat, baseLong, variance)
+		// Find the city base coordinates
+		cityCoords, exists := cities[data.City]
+		if !exists {
+			return fmt.Errorf("no coordinates found for city: %s", data.City)
+		}
+
+		lat, long := generateGeolocation(cityCoords.BaseLat, cityCoords.BaseLong, variance)
 		ownerID, exists := emailToUserID[data.OwnerEmail]
 
 		if !exists {
@@ -424,23 +508,45 @@ var mockMenuItems = map[string][]struct {
 		}
 		data.ReservationID = table.TableID
 	}
-	for category, items := range mockMenuItems {
-		for _, item := range items {
-			menuItem := models.MenuItem{
-				RestaurantID: item.RestaurantID,
-				NameOfItem:   &item.NameOfItem,
-				Price:        &item.Price,
-				Category:     &category,
-				IsAvailable:  item.IsAvailable,
-				ImageURL:     item.ImageURL,
-				Description:  &item.Description,
+	for restaurantID := 1; restaurantID <= 80; restaurantID++ {
+		for category, items := range mockMenuItems {
+			for _, item := range items {
+				// Adjust RestaurantID for each restaurant dynamically
+				item.RestaurantID = uint(restaurantID)
+
+				menuItem := models.MenuItem{
+					RestaurantID: item.RestaurantID,
+					NameOfItem:   &item.NameOfItem,
+					Price:        &item.Price,
+					Category:     &category,
+					IsAvailable:  item.IsAvailable,
+					ImageURL:     item.ImageURL,
+					Description:  &item.Description,
+				}
+				if err := tx.Create(&menuItem).Error; err != nil {
+					tx.Rollback()
+					return fmt.Errorf("failed to create menu item for restaurant %d: %v", restaurantID, err)
+				}
 			}
-			if err := tx.Create(&menuItem).Error; err != nil {
-				tx.Rollback()
-				return fmt.Errorf("failed to create menu item for restaurant %d: %v", item.RestaurantID, err)
-			}
+		}
 	}
-}
+// 	for category, items := range mockMenuItems {
+// 		for _, item := range items {
+// 			menuItem := models.MenuItem{
+// 				RestaurantID: item.RestaurantID,
+// 				NameOfItem:   &item.NameOfItem,
+// 				Price:        &item.Price,
+// 				Category:     &category,
+// 				IsAvailable:  item.IsAvailable,
+// 				ImageURL:     item.ImageURL,
+// 				Description:  &item.Description,
+// 			}
+// 			if err := tx.Create(&menuItem).Error; err != nil {
+// 				tx.Rollback()
+// 				return fmt.Errorf("failed to create menu item for restaurant %d: %v", item.RestaurantID, err)
+// 			}
+// 	}
+// }
 
 	for _, r := range reservations {
 		reservation := models.Reservation{
