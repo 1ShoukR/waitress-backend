@@ -67,7 +67,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 		fmt.Println("Received apiToken:", apiToken)
 
-		maxDistance := 50000.0 // Max distance in meters, increase for testing. Will need to be dynamic based on user input.
+		maxDistance := 100000.0 // Max distance in meters, increase for testing. Will need to be dynamic based on user input.
 
 		// SQL query to calculate distance and filter restaurants
 		query := `
