@@ -69,6 +69,9 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 		maxDistance := 100000.0 // Max distance in meters, increase for testing. Will need to be dynamic based on user input.
 
+		// Debug user location
+		fmt.Printf("User location: Latitude: %f, Longitude: %f\n", userLat, userLong)
+
 		// SQL query to calculate distance and filter restaurants
 		query := `
 			SELECT *, (
@@ -77,7 +80,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 					sin(radians(?)) * sin(radians(latitude))
 				)
 			) AS distance
-			FROM restaurant
+			FROM restaurants
 			HAVING distance < ?
 			ORDER BY distance
 		`
@@ -89,6 +92,12 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			return
 		}
 
+		// Debugging: Output the result of the distance calculation
+		for _, restaurant := range restaurants {
+			fmt.Printf("Restaurant: %s, Latitude: %f, Longitude: %f\n",
+				restaurant.Name, *restaurant.Latitude, *restaurant.Longitude)
+		}
+
 		// Get the IDs of the filtered restaurants
 		var restaurantIDs []uint
 		for _, restaurant := range restaurants {
@@ -96,7 +105,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		}
 
 		// Retrieve restaurants with preloaded ratings based on the filtered restaurant IDs
-		err = db.Preload("Ratings").Preload("Categories").Where("restaurant_id IN (?)", restaurantIDs).Find(&restaurants).Error
+		err = db.Preload("Ratings").Preload("Categories").Where("restaurant_id IN ?", restaurantIDs).Find(&restaurants).Error
 		if err != nil {
 			fmt.Println("Error preloading ratings:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to preload ratings"})
