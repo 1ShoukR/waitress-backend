@@ -64,6 +64,7 @@ func NewServer() *http.Server {
 	routes.AuthRoutes(newServer.router, db)
 	routes.RestaurantRoutes(newServer.router, db)
 	routes.UtilitiesRoutes(newServer.router, db)
+	routes.CategoryRoutes(newServer.router, db)
 	// ... include other route groups as needed
 
 	// Configure the HTTP server
