@@ -56,6 +56,13 @@ type Restaurant struct {
 	// Calculated fields
 	AverageRating   float32 `gorm:"default:0"`
 	ReviewCount    *int    `gorm:"-"`
+	FloorPlan    *FloorPlan `gorm:"foreignKey:RestaurantID"`
+}
+
+type FloorPlan struct {
+    ID           uint   `gorm:"primaryKey;autoIncrement:true"`
+    RestaurantID uint   `gorm:"uniqueIndex"`
+    Layout       string `gorm:"type:json"`  // For MySQL
 }
 
 // Rating represents a rating record in the database.
