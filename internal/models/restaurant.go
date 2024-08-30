@@ -60,9 +60,12 @@ type Restaurant struct {
 }
 
 type FloorPlan struct {
-    FloorplanId           uint   `gorm:"primaryKey;autoIncrement:true"`
+    FloorplanId  uint   `gorm:"primaryKey;autoIncrement:true"`
     RestaurantId uint   `gorm:"uniqueIndex"`
     Layout       string `gorm:"type:json"`  // For MySQL
+	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
+	CreatedAt    time.Time
+    UpdatedAt    time.Time
 }
 
 // Rating represents a rating record in the database.
