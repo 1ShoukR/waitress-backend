@@ -8,6 +8,7 @@ package routes
 
 import (
 	"waitress-backend/internal/handlers"
+	"waitress-backend/internal/utilities"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -15,14 +16,13 @@ import (
 // UserRoutes sets up the routes for the user endpoints
 func UserRoutes(router *gin.Engine, db *gorm.DB) {
 	user := router.Group("api/users")
+	userGroups := utilities.NewUserGroups()           // Initialize your user groups
+	authGroups := utilities.NewAuthGroups(userGroups) // Create the auth groups from user groups
 	{
 		user.POST("/create", handlers.CreateUser(db))
 		user.POST("/get", handlers.GetUser(db))
 		user.POST("/update-user-location", handlers.UpdateUserLocation(db))
 		user.POST("/update-account-info", handlers.UpdateUserAccountInformation(db))
-		// user.POST("/", handlers.CreateUser)
-		// user.GET("/:id", handlers.GetUser)
-		// user.PUT("/:id", handlers.UpdateUser)
-		// user.DELETE("/:id", handlers.DeleteUser)
+		user.POST("/get-admin-data", utilities.UserRequired(authGroups, "Admin", "all"), handlers.GetAdminData(db))
 	}
 }
