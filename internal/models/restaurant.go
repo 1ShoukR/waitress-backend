@@ -60,8 +60,8 @@ type Restaurant struct {
 }
 
 type FloorPlan struct {
-    ID           uint   `gorm:"primaryKey;autoIncrement:true"`
-    RestaurantID uint   `gorm:"uniqueIndex"`
+    FloorplanId           uint   `gorm:"primaryKey;autoIncrement:true"`
+    RestaurantId uint   `gorm:"uniqueIndex"`
     Layout       string `gorm:"type:json"`  // For MySQL
 }
 
