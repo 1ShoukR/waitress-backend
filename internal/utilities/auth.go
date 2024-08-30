@@ -157,7 +157,7 @@ func getClientFromRequest(c *gin.Context) (models.APIClient, error) {
 }
 
 // getAuthTypeFromSession retrieves the auth type from the Gin session.
-func getAuthTypeFromSession(c *gin.Context) (string, error) {
+func GetAuthTypeFromSession(c *gin.Context) (string, error) {
 	session := sessions.Default(c)
 	authType, ok := session.Get("authType").(string)
 	if !ok || authType == "" {
@@ -200,7 +200,7 @@ func ClientRequired(clientTypes ...string) gin.HandlerFunc {
 // Gin middleware that ensures the request is made by an authorized user.
 func UserRequired(authGroups AuthGroups, group, subgroup string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authType, err := getAuthTypeFromSession(c)
+		authType, err := GetAuthTypeFromSession(c)
 		if err != nil {
 			fmt.Println("Error getting auth type from session:", err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
