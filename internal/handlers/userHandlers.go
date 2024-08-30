@@ -18,7 +18,7 @@ import (
 
 	// "waitress-backend/internal/handlers"
 	"waitress-backend/internal/models"
-
+	// "waitress-backend/internal/utilities"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -184,5 +184,33 @@ func UpdateUserAccountInformation(db *gorm.DB) gin.HandlerFunc {
 		}
 		token := sessions.Default(c).Get("apiToken")
 		c.JSON(http.StatusOK, gin.H{"message": "User account information updated successfully", "user": updatedUser, "token": token})
+	}
+}
+
+func GetAdminData(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := sessions.Default(c).Get("userID")
+		authType := sessions.Default(c).Get("authType")
+		fmt.Println("User ID: ", userId)
+		var restaurants []models.Restaurant
+		var query *gorm.DB
+		if authType == "dev" {
+			// For dev, get top 100 restaurants (assuming 'restaurant_id' is the primary key)
+			query = db.Order("restaurant_id desc").Preload("FloorPlan").Limit(100).Find(&restaurants)
+		} else {
+			// For admin and admin_super, get restaurants owned by the user
+			query = db.Where("owner_id = ?", userId).Find(&restaurants)
+		}
+
+		if query.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error retrieving restaurants"})
+			return
+		}
+
+		if len(restaurants) == 0 {
+			c.JSON(http.StatusNotFound, gin.H{"message": "No restaurants found"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"restaurants": restaurants})
 	}
 }
