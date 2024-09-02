@@ -47,6 +47,7 @@ func MigrateDb(db *gorm.DB) gin.HandlerFunc {
 			&models.Receipt{},
 			&models.MenuItem{},
 			&models.Order{},
+			&models.Staff{},
 			&models.Payment{},
 		}
 

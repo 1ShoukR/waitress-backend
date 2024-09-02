@@ -17,12 +17,12 @@ import (
 
 // Entity is the base class for a person. Each person can be a user or staff.
 type Entity struct {
-	EntityID  uint   `gorm:"primaryKey;autoIncrement"`
-	FirstName string `gorm:"size:255;not null"`
-	LastName  string `gorm:"size:255;not null"`
-	Type      string `gorm:"size:50"`
-    CreatedAt time.Time      `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
-    UpdatedAt time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
+	EntityID  uint           `gorm:"primaryKey;autoIncrement"`
+	FirstName string         `gorm:"size:255;not null"`
+	LastName  string         `gorm:"size:255;not null"`
+	Type      string         `gorm:"size:50"`
+	CreatedAt time.Time      `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
@@ -37,12 +37,12 @@ type User struct {
 	AuthType      string `gorm:"size:50"`
 	Latitude      float64
 	Longitude     float64
-	Phone		  *string
+	Phone         *string
 	Address       *string
 	ProfileImage  *string
 	Reservations  []Reservation `gorm:"foreignKey:UserID"`
 	Ratings       []Rating      `gorm:"foreignKey:UserID"`
-	Payments 	  []Payment     `gorm:"foreignKey:UserID"`
+	Payments      []Payment     `gorm:"foreignKey:UserID"`
 }
 
 // Grab a user's payments based off signed in user session
@@ -79,7 +79,6 @@ func (user *User) UpdateAccountInformation(db *gorm.DB, firstName string, lastNa
 	}
 	return user, nil
 }
-
 
 // GORM requires only the non-embedded fields for the model's actual mapping.
 // The embedded fields are automatically included.

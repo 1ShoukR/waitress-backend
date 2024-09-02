@@ -50,6 +50,7 @@ type Restaurant struct {
 	Reservations   []Reservation `gorm:"foreignKey:RestaurantID"`
 	MenuItems      []MenuItem    `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	Owner          User          `gorm:"foreignKey:OwnerID"`
+	Staff          []Staff       `gorm:"foreignKey:RestaurantID"`
 	Ratings        []Rating      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	FloorPlans     []FloorPlan   `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	ImageURL       *string       // Pointer to allow nil (nullable)
