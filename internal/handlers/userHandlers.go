@@ -196,7 +196,7 @@ func GetAdminData(db *gorm.DB) gin.HandlerFunc {
 		var query *gorm.DB
 		if authType == "dev" {
 			// For dev, get top 100 restaurants (assuming 'restaurant_id' is the primary key)
-			query = db.Order("restaurant_id desc").Preload("FloorPlan").Limit(100).Find(&restaurants)
+			query = db.Order("restaurant_id desc").Preload("FloorPlans").Limit(100).Find(&restaurants)
 		} else {
 			// For admin and admin_super, get restaurants owned by the user
 			query = db.Where("owner_id = ?", userId).Find(&restaurants)
