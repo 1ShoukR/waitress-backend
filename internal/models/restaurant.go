@@ -52,7 +52,7 @@ type Restaurant struct {
 	Owner          User          `gorm:"foreignKey:OwnerID"`
 	Staff          []Staff       `gorm:"foreignKey:RestaurantID"`
 	Ratings        []Rating      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
-	FloorPlans     []FloorPlan   `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
+	FloorPlans     *[]FloorPlan   `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	ImageURL       *string       // Pointer to allow nil (nullable)
 	// Calculated fields
 	AverageRating float32 `gorm:"default:0"`
@@ -63,6 +63,7 @@ type FloorPlan struct {
 	FloorplanID  uint   `gorm:"primaryKey;autoIncrement:true"`
 	RestaurantID uint   `gorm:"not null"`
 	Layout       string `gorm:"type:json"`
+	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
