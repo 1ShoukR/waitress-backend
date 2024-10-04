@@ -62,7 +62,7 @@ type Restaurant struct {
 type FloorPlan struct {
 	FloorplanID  uint   `gorm:"primaryKey;autoIncrement:true"`
 	RestaurantID uint   `gorm:"not null"`
-	Layout       string `gorm:"type:json"`
+	FloorplanName       string `gorm:"type:json"`
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
@@ -128,12 +128,14 @@ type Order struct {
 type Table struct {
 	TableID             uint   `gorm:"primaryKey;autoIncrement"`
 	RestaurantID        uint   `gorm:"not null"`
+	FloorplanID         uint   `gorm:"not null"`
 	ReservationID       *uint  // It's a pointer to allow nil value when no reservation is associated
 	TableNumber         uint   `gorm:"not null"`
 	Capacity            uint   `gorm:"not null"`
 	LocationDescription string `gorm:"size:200"` // Description of the table's location
 	IsReserved          bool   `gorm:"default:false"`
 	CustomerID          *uint  // It's a pointer to allow nil value when no customer is associated
+	FloorPlan		   FloorPlan `gorm:"foreignKey:FloorplanID"`
 
 	// Define relationships
 	// Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
