@@ -299,16 +299,12 @@ func CreateNewFloorplan(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			Tables       []models.Table `json:"tables"`
 			Name         string         `json:"name"`
 		}
-		fmt.Println("Request: ", request)
 		if err := c.BindJSON(&request); err != nil {
 			fmt.Println("Error binding JSON:", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 			return
 		}
-		// print the request for debugging
 		fmt.Printf("%+v\n", request)
-		// var tables []models.Table
-		// var floorplan models.FloorPlan
-
+		c.IndentedJSON(http.StatusOK, gin.H{"message": "Floorplan created"})
 	}
 }
