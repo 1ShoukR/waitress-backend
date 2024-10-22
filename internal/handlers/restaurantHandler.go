@@ -293,18 +293,63 @@ func GetAllCategories(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 }
 
 func CreateNewFloorplan(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
-	return func(c *gin.Context){
+	return func(c *gin.Context) {
 		var request struct {
-			RestaurantID string           `json:"restaurantId"`
+			RestaurantID string        `json:"restaurantId"`
 			Tables       []models.Table `json:"tables"`
-			Name         string         `json:"name"`
+			Name         string        `json:"name"`
 		}
 		if err := c.BindJSON(&request); err != nil {
 			fmt.Println("Error binding JSON:", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
 			return
 		}
-		fmt.Printf("%+v\n", request)
-		c.IndentedJSON(http.StatusOK, gin.H{"message": "Floorplan created"})
+
+		restaurantID, err := strconv.Atoi(request.RestaurantID)
+		if err != nil {
+			fmt.Println("Error parsing RestaurantID to int:", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid restaurant ID"})
+			return
+		}
+
+		// TODO: Validate Floorplan
+		floorplan := models.FloorPlan{
+			RestaurantID: uint(restaurantID),
+			FloorplanName:        request.Name,
+		}
+
+		// result := db.Create(&floorplan)
+		// if result.Error != nil {
+		// 	fmt.Println("Error creating floorplan:", result.Error)
+		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create floorplan"})
+		// 	return
+		// }
+
+		// TODO: Validate tables and associted with restaurants and floorplan
+		for _, tableData := range request.Tables {
+			table := models.Table{
+				RestaurantID:        uint(restaurantID),
+				TableNumber:         tableData.TableNumber,
+				Capacity:            tableData.Capacity,
+				LocationDescription: tableData.LocationDescription,
+				FloorPlan: 			 tableData.FloorPlan,
+				// Capacity: 			 tableData.
+			}
+			fmt.Printf("%+v\n", table)
+
+			// result := db.Create(&table)
+			// if result.Error != nil {
+			// 	fmt.Println("Error creating table:", result.Error)
+
+			// 	c.JSON(http.StatusInternalServerError, gin.H{
+			// 		"message": "Error creating tables",
+			// 	})
+			// }
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message":     "Floorplan and tables created successfully",
+			"floorplanId": floorplan.FloorplanID,
+		})
 	}
 }
