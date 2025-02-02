@@ -60,9 +60,9 @@ type Restaurant struct {
 }
 
 type FloorPlan struct {
-	FloorplanID  uint   `gorm:"primaryKey;autoIncrement:true"`
-	RestaurantID uint   `gorm:"not null"`
-	FloorplanName       string `gorm:"type:json"`
+	FloorplanID  uint   	`gorm:"primaryKey;autoIncrement:true"`
+	RestaurantID uint   	`gorm:"not null"`
+	FloorplanName  string   `gorm:"size:255"`
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
