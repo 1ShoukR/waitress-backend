@@ -14,11 +14,11 @@ import (
 	"waitress-backend/internal/models"
 	"waitress-backend/internal/server/routes"
 
+	"github.com/gin-contrib/cors"
 	gormsessions "github.com/gin-contrib/sessions/gorm"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
-
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	_ "github.com/joho/godotenv/autoload"
@@ -26,8 +26,8 @@ import (
 
 // The Server struct contains the port, database connection, and the Gin Engine
 type Server struct {
-	port   int	 // Port number for the server
-	db     *gorm.DB // Pointer to the GORM database connection
+	port   int        // Port number for the server
+	db     *gorm.DB   // Pointer to the GORM database connection
 	router *gin.Engine // Add the Gin Engine to the Server struct
 }
 
@@ -43,19 +43,34 @@ func NewServer() *http.Server {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
+
 	gob.Register(models.User{})
 	store := gormsessions.NewStore(db, true, []byte(os.Getenv("SESSION_SECRET")))
 	fmt.Printf("Store session: %v", store)
+
 	router := gin.Default()
+
+	// Configure CORS
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:5173"} // Add your frontend URL
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	config.AllowCredentials = true
+	config.ExposeHeaders = []string{"Content-Length"}
+	config.MaxAge = 12 * time.Hour
+
+	router.Use(cors.New(config))
 	router.Use(sessions.Sessions("mysession", store))
+
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "pong",
 		})
 	})
+
 	newServer := &Server{
-		port:   port, // Initialize the port number here
-		db:     db, // Initialize the GORM database connection here
+		port:   port,   // Initialize the port number here
+		db:     db,     // Initialize the GORM database connection here
 		router: router, // Initialize the Gin Engine here
 	}
 
