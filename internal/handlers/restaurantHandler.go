@@ -318,14 +318,14 @@ func CreateNewFloorplan(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			FloorplanName:        request.Name,
 		}
 
-		// result := db.Create(&floorplan)
-		// if result.Error != nil {
-		// 	fmt.Println("Error creating floorplan:", result.Error)
-		// 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create floorplan"})
-		// 	return
-		// }
+		result := db.Create(&floorplan)
+		if result.Error != nil {
+			fmt.Println("Error creating floorplan:", result.Error)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create floorplan"})
+			return
+		}
 
-		// TODO: Validate tables and associted with restaurants and floorplan
+		// TODO: Validate tables and associated with restaurants and floorplan
 		for _, tableData := range request.Tables {
 			table := models.Table{
 				RestaurantID:        uint(restaurantID),
@@ -337,14 +337,14 @@ func CreateNewFloorplan(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			}
 			fmt.Printf("%+v\n", table)
 
-			// result := db.Create(&table)
-			// if result.Error != nil {
-			// 	fmt.Println("Error creating table:", result.Error)
+			result := db.Create(&table)
+			if result.Error != nil {
+				fmt.Println("Error creating table:", result.Error)
 
-			// 	c.JSON(http.StatusInternalServerError, gin.H{
-			// 		"message": "Error creating tables",
-			// 	})
-			// }
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": "Error creating tables",
+				})
+			}
 		}
 
 		c.JSON(http.StatusOK, gin.H{
