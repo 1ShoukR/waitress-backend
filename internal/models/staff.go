@@ -11,6 +11,7 @@ type Staff struct {
 	StaffID      uint   `gorm:"primaryKey;autoIncrement:false"` // Use UserID as primary key
 	Role         string `gorm:"size:50;not null"`
 	RestaurantID uint   `gorm:"not null"` // Foreign key to the Restaurant table
+	IsActive     bool   `gorm:"default:true"`
 }
 
 func (Staff) TableName() string {
