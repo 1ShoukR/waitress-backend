@@ -8,7 +8,6 @@
 // - Order
 // - Table
 
-
 package models
 
 import (
@@ -36,26 +35,30 @@ type Category struct {
 
 // Restaurant represents a restaurant record in the database.
 type Restaurant struct {
-	RestaurantId    uint           `gorm:"primaryKey;autoIncrement:true"`
-	OwnerID         uint           `gorm:"not null"`
-	Name            string         `gorm:"size:255;not null"`
-	Address         string         `gorm:"size:255;not null"`
-	Phone           string         `gorm:"size:255;not null"`
-	Email           string         `gorm:"size:255;not null"`
+	RestaurantId   uint           `gorm:"primaryKey;autoIncrement:true"`
+	OwnerID        uint           `gorm:"index"`
+	Name           string         `gorm:"size:255;not null"`
+	Address        string         `gorm:"size:255;not null"`
+	Phone          string         `gorm:"size:255;not null"`
+	Email          string         `gorm:"size:255;not null"`
 	Website        *string        // Pointer to allow nil (nullable)
-	Categories      []Category     `gorm:"many2many:restaurant_categories;"`
+	Categories     []Category     `gorm:"many2many:restaurant_categories;"`
 	NumberOfTables *int           // Pointer to allow nil (nullable)
 	Latitude       *float64       // Pointer to allow nil (nullable)
 	Longitude      *float64       // Pointer to allow nil (nullable)
-	Receipts        []Receipt      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
+	Receipts       []Receipt      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	Reservations   *[]Reservation `gorm:"foreignKey:RestaurantID"`
-	MenuItems	   *[]MenuItem    `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
-	Owner          User           `gorm:"foreignKey:OwnerID"`
+	MenuItems      *[]MenuItem    `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
+	Owner          User           `gorm:"foreignKey:OwnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	Ratings        *[]Rating      `gorm:"foreignKey:RestaurantID"` // One-to-many relationship
 	ImageURL       *string        // Pointer to allow nil (nullable)
 	// Calculated fields
-	AverageRating   float32 `gorm:"default:0"`
-	ReviewCount    *int    `gorm:"-"`
+	AverageRating float32 `gorm:"default:0"`
+	ReviewCount   *int    `gorm:"-"`
+}
+
+func (Restaurant) TableName() string {
+	return "restaurants"
 }
 
 // Rating represents a rating record in the database.
@@ -71,9 +74,9 @@ type Rating struct {
 
 // Reservation represents a reservation record in the database.
 type Reservation struct {
-	ReservationID uint `gorm:"primaryKey;autoIncrement:true"`
-    CreatedAt     time.Time      `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
-    UpdatedAt     time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
+	ReservationID uint           `gorm:"primaryKey;autoIncrement:true"`
+	CreatedAt     time.Time      `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+	UpdatedAt     time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 	RestaurantID  uint           `gorm:"not null"`
 	UserID        uint           `gorm:"not null"`
@@ -91,7 +94,7 @@ type MenuItem struct {
 	Price        *float64   // Pointer to allow nil (nullable)
 	IsAvailable  bool       `gorm:"default:true"`
 	Category     *string    // Pointer to allow nil (nullable)
-	ImageURL	 *string    // Pointer to allow nil (nullable)
+	ImageURL     *string    // Pointer to allow nil (nullable)
 	Description  *string    // Pointer to allow nil (nullable)
 	Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
 }
