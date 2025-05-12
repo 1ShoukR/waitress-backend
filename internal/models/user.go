@@ -221,6 +221,37 @@ type Favorite struct {
 	UpdatedAt    time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
 	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }
+
+func (u *User) GetAllFavorites(db *gorm.DB) ([]Favorite, error) {
+	var favorites []Favorite
+	if err := db.Where("user_id = ?", u.UserID).Find(&favorites).Error; err != nil {
+		return nil, err
+	}
+	return favorites, nil
+}
+
+func (u *User) AddToFavorites(db *gorm.DB, restaurantId uint) error {
+	tx := db.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	favorite := Favorite{
+		UserID: u.UserID,
+		RestaurantId: restaurantId,
+	}
+	
+	if err := tx.Create(&favorite).Error; err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
+}
+
+
 func (Favorite) TableName() string {
 	return "favorites"
 }
