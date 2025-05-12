@@ -42,6 +42,7 @@ func EditRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 	}
 }
+
 type LocationRequest struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
@@ -78,7 +79,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 					sin(radians(?)) * sin(radians(latitude))
 				)
 			) AS distance
-			FROM restaurant
+			FROM restaurants
 			HAVING distance < ?
 			ORDER BY distance
 		`
@@ -94,7 +95,7 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 		// Debugging: Output the result of the distance calculation
 		for _, restaurant := range restaurants {
 			fmt.Printf("Restaurant: %s, Latitude: %f, Longitude: %f,\n",
-				restaurant.Name, *restaurant.Latitude, *restaurant.Longitude,)
+				restaurant.Name, *restaurant.Latitude, *restaurant.Longitude)
 		}
 
 		// Get the IDs of the filtered restaurants
@@ -264,13 +265,13 @@ func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var restaurants []models.Restaurant
-		err := db.Table("restaurant"). // Correct table name should be "restaurants"
-			Preload("Ratings").
-			Order("average_rating DESC").
-			Limit(10).
-			Preload("Categories").
-			Preload("MenuItems"). // Ensure that your model has a MenuItems relation defined
-			Find(&restaurants).Error
+		err := db.Table("restaurants"). // Correct table name should be "restaurants"
+						Preload("Ratings").
+						Order("average_rating DESC").
+						Limit(10).
+						Preload("Categories").
+						Preload("MenuItems"). // Ensure that your model has a MenuItems relation defined
+						Find(&restaurants).Error
 		if err != nil {
 			fmt.Println("Error executing the query:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching top restaurants"})
@@ -289,5 +290,60 @@ func GetAllCategories(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			return
 		}
 		c.IndentedJSON(http.StatusOK, categories)
+	}
+}
+
+// And then update your handler to use it correctly
+func GetUserFavorites(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Parse user ID from parameter
+		userIdStr := c.Param("userId")
+		userId, err := strconv.ParseUint(userIdStr, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+			return
+		}
+
+		// First, get the user
+		var user models.User
+		if err := db.First(&user, userId).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+
+		// Then call the method on the user instance
+		favorites, err := user.GetAllFavorites(db)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching favorites", "message": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, favorites)
+	}
+}
+
+func AddToFavorite(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userId := c.Param("userId")
+		restaurantId := c.Param("restaurantId")
+		var user models.User
+		if err := db.First(&user, userId).Error; err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+			return
+		}
+		fmt.Printf("User ID: %s\n", userId)
+		fmt.Printf("Restaurant ID: %s\n", restaurantId)
+		// Add to favorites
+		restId, err := strconv.ParseUint(restaurantId, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid restaurant ID"})
+			return
+		}
+		err = user.AddToFavorites(db, uint(restId))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error adding to favorites", "message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Restaurant added to favorites"})
 	}
 }
