@@ -241,6 +241,7 @@ func (u *User) AddToFavorites(db *gorm.DB, restaurantId uint) error {
 	favorite := Favorite{
 		UserID: u.UserID,
 		RestaurantId: restaurantId,
+		User: *u,
 	}
 	
 	if err := tx.Create(&favorite).Error; err != nil {
