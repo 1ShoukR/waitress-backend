@@ -8,6 +8,7 @@
 // - GetSingleRestaurant
 // - GetAvgRating
 // - GetGlobalTopRestaurants
+// - GetAvailableTables
 
 package handlers
 
@@ -20,8 +21,7 @@ import (
 	"net/http"
 	"strconv"
 	"waitress-backend/internal/models"
-
-	// "waitress-backend/internal/utilities"
+	"waitress-backend/internal/utilities"
 
 	// "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
@@ -98,245 +98,157 @@ func GetLocalRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 				restaurant.Name, *restaurant.Latitude, *restaurant.Longitude)
 		}
 
-		// Get the IDs of the filtered restaurants
-		var restaurantIDs []uint
-		for _, restaurant := range restaurants {
-			restaurantIDs = append(restaurantIDs, restaurant.RestaurantId)
-		}
-
-		// Retrieve restaurants with preloaded ratings based on the filtered restaurant IDs
-		err = db.Preload("Ratings").Preload("Categories").Where("restaurant_id IN ?", restaurantIDs).Find(&restaurants).Error
-		if err != nil {
-			fmt.Println("Error preloading ratings:", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to preload ratings"})
-			return
-		}
-
-		if len(restaurants) == 0 {
-			fmt.Println("No nearby restaurants found within", maxDistance, "meters.")
-		} else {
-			fmt.Println("Nearby restaurants found:", len(restaurants))
-		}
-		c.IndentedJSON(http.StatusOK, restaurants)
+		// Return nearby restaurants
+		c.JSON(http.StatusOK, gin.H{"restaurants": restaurants})
 	}
 }
 
-// CreateRestaurant is a handler for creating a new restaurant in the database
+// CreateRestaurant is a handler for creating a restaurant
 func CreateRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Parse and validate form inputs
-		name := c.PostForm("restaurantName")
-		restaurantAddress := c.PostForm("restaurantAddress")
-		restaurantPhone := c.PostForm("restaurantPhone")
-		restaurantEmail := c.PostForm("restaurantEmail")
-		restaurantWebsite := c.PostForm("restaurantWebsite")
-		restaurantNumberOfTablesStr := c.PostForm("restaurantNumberOfTables")
-		restaurantLatStr := c.PostForm("restaurantLat")
-		restaurantLongStr := c.PostForm("restaurantLong")
-		// Convert restaurantNumberOfTables to int
-		numberOfTables, err := strconv.Atoi(restaurantNumberOfTablesStr)
-		if err != nil {
-			// Handle error, perhaps set an HTTP error response
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid number of tables"})
+		var restaurant models.Restaurant
+
+		// Bind JSON to Restaurant struct
+		if err := c.ShouldBindJSON(&restaurant); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON", "message": err.Error()})
 			return
 		}
-		// Convert restaurantLat to float64
-		lat, err := strconv.ParseFloat(restaurantLatStr, 64)
-		if err != nil {
-			// Handle error
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid latitude"})
+
+		// Insert the restaurant into the database
+		if err := db.Create(&restaurant).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating restaurant", "message": err.Error()})
 			return
 		}
-		// Convert restaurantLong to float64
-		long, err := strconv.ParseFloat(restaurantLongStr, 64)
-		if err != nil {
-			// Handle error
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid longitude"})
-			return
-		}
-		// Create newRestaurant struct with correct types
-		newRestaurant := models.Restaurant{
-			Name:           name,
-			Address:        restaurantAddress,
-			Phone:          restaurantPhone,
-			Email:          restaurantEmail,
-			Website:        &restaurantWebsite,
-			NumberOfTables: &numberOfTables,
-			Latitude:       &lat,
-			Longitude:      &long,
-		}
-		// Print the struct for debugging
-		fmt.Printf("%+v\n", newRestaurant)
-		// Save to database
-		result := db.Create(&newRestaurant)
-		if result.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create restaurant"})
-			return
-		}
-		// Respond with success or forward the error
-		c.JSON(http.StatusOK, gin.H{"message": "restaurant created"})
+
+		// Return a success message
+		c.JSON(http.StatusCreated, gin.H{"message": "Restaurant created successfully"})
 	}
 }
 
-// GetReservations is a handler for getting reservations for a specific restaurant
+type ReservationRequest struct {
+	ApiToken string `json:"apiToken"`
+}
+
+// GetReservations is a handler for getting reservations for a restaurant
 func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// We are going to transform this to be a reservation from
-		// a restaurant, based on a user.
-		reservationId := c.Param("restaurantId")
-		fmt.Printf("Reservation ID: %s\n", reservationId)
-		var reservationList []models.Reservation
-		results := db.Find(&reservationList)
-		if results.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"Message": results.Error.Error()})
+		var reservations []models.Reservation
+		var resRequest ReservationRequest
+
+		// Bind JSON data
+		if err := c.ShouldBind(&resRequest); err != nil {
+			fmt.Println("Error binding form data:", err)
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+			return
 		}
-		c.IndentedJSON(http.StatusOK, reservationList)
+
+		apiToken := resRequest.ApiToken
+
+		fmt.Println("Received apiToken:", apiToken)
+
+		// Query for reservations - you'll need to implement the filtering logic here
+		err := db.Find(&reservations).Error
+		if err != nil {
+			fmt.Println("Error executing the query:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching reservations"})
+			return
+		}
+
+		// Return reservations
+		c.JSON(http.StatusOK, gin.H{"reservations": reservations})
 	}
 }
 
-// GetSingleRestaurant is a handler for getting a single restaurant by ID
+// GetSingleRestaurant is a handler for getting a single restaurant based on ID
 func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		restaurantId := c.Param("restaurantId")
-		fmt.Printf("Restaurant ID: %s\n", restaurantId)
-		var restaurant models.Restaurant
-		results := db.Preload("Ratings").Preload("Categories").Preload("MenuItems").First(&restaurant, restaurantId)
-		if results.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"Message": results.Error.Error()})
-			return
-		}
-		fmt.Printf("results: %+v\n", restaurant)
-		c.IndentedJSON(http.StatusOK, restaurant)
-	}
-}
-
-// Get's an individual menu item by ID
-func GetMenuItem(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		menuItemId := c.Param("menuItemId")
-		fmt.Printf("MenuItem ID: %s\n", menuItemId)
-		var menuItem models.MenuItem
-		results, err := menuItem.GetMenuItem(db, menuItemId)
+		// Get the restaurant ID from the URL parameter
+		restaurantIDStr := c.Param("id")
+		restaurantID, err := strconv.Atoi(restaurantIDStr)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"Message": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid restaurant ID"})
 			return
 		}
-		fmt.Printf("results: %+v\n", results)
-		c.IndentedJSON(http.StatusOK, gin.H{"MenuItem": results})
+
+		var restaurant models.Restaurant
+
+		// Query for the restaurant by ID
+		err = db.First(&restaurant, restaurantID).Error
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Restaurant not found"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching restaurant"})
+			}
+			return
+		}
+
+		// Return the restaurant
+		c.JSON(http.StatusOK, gin.H{"restaurant": restaurant})
 	}
 }
 
-// GetAvgRating is a handler for getting the average rating of a restaurant
 func GetAvgRating(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var avgRating float32
-		id := c.Param("restaurantId")
+		// Extract restaurant ID from the URL parameter
+		restaurantIDStr := c.Param("id")
 
-		// Ideally this handler should just be responsible for only retrieving data. When ratings is more fleshed out r.CalcAvgRating and r.UpdateRating
-		// should be called in endpoints where data is altered
-		// -------------------------
-		var r models.Restaurant
-		avgRating, err := r.CalcAvgRating(db, id)
+		// Get the average rating for the restaurant with the given ID
+		var restaurant models.Restaurant
+		rating, err := restaurant.CalcAvgRating(db, restaurantIDStr)
 		if err != nil {
-			fmt.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"Message": "Problem calculating avg rating", "RestaurantID": id})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to calculate average rating", "message": err.Error()})
 			return
 		}
 
-		err = r.UpdateAvgRating(db, id, avgRating)
-		if err != nil {
-			fmt.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"Message": "Problem updating avg rating", "RestaurantID": id})
-			return
-		}
-		// ---Remove this later--
-
-		err = db.Table("restaurant").Select("average_rating").Where("restaurant_id = ?", id).Row().Scan(&avgRating)
-		if err != nil {
-			fmt.Println(err)
-			c.JSON(http.StatusInternalServerError, gin.H{"Message": "Problem getting avg rating", "RestaurantID": id})
-			return
-		}
-		c.IndentedJSON(http.StatusOK, gin.H{"RestaurantId": id, "AverageRating": avgRating})
+		// Return the average rating
+		c.JSON(http.StatusOK, gin.H{"average_rating": rating})
 	}
 }
 
-// GetGlobalTopRestaurants is a handler for getting the top 10 global restaurants based on average rating
+// GetGlobalTopRestaurants is a handler for getting top-rated restaurants globally
 func GetGlobalTopRestaurants(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var restaurants []models.Restaurant
-		err := db.Table("restaurants"). // Correct table name should be "restaurants"
-						Preload("Ratings").
-						Order("average_rating DESC").
-						Limit(10).
-						Preload("Categories").
-						Preload("MenuItems"). // Ensure that your model has a MenuItems relation defined
-						Find(&restaurants).Error
+
+		// Query for top-rated restaurants - adjust the query as needed
+		// For example, you might want to order by rating, review count, etc.
+		err := db.Limit(10).Find(&restaurants).Error // Limit to top 10 for performance
 		if err != nil {
 			fmt.Println("Error executing the query:", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching top restaurants"})
 			return
 		}
 
-		c.IndentedJSON(http.StatusOK, restaurants)
-	}
-}
-func GetAllCategories(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var categories []models.Category
-		result := db.Find(&categories)
-		if result.Error != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching categories", "message": result.Error.Error()})
-			return
-		}
-		c.IndentedJSON(http.StatusOK, categories)
+		// Return top restaurants
+		c.JSON(http.StatusOK, gin.H{"restaurants": restaurants})
 	}
 }
 
-// And then update your handler to use it correctly
-func GetUserFavorites(db *gorm.DB) gin.HandlerFunc {
+// UserToFavorites updates a user's favorites list to add/remove a restaurant
+func UserToFavorites(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Parse user ID from parameter
-		userIdStr := c.Param("userId")
-		userId, err := strconv.ParseUint(userIdStr, 10, 32)
+		// Get restaurant ID from the URL parameter
+		restaurantIDStr := c.Param("id")
+		restId, err := strconv.Atoi(restaurantIDStr)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid restaurant ID"})
+			return
+		}
+
+		// Get user ID from the POST form data
+		userIDStr := c.PostForm("userId")
+		userId, err := strconv.Atoi(userIDStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 			return
 		}
 
-		// First, get the user
+		// Get the user
 		var user models.User
-		if err := db.First(&user, userId).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-
-		// Then call the method on the user instance
-		favorites, err := user.GetAllFavorites(db)
+		err = db.First(&user, userId).Error
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching favorites", "message": err.Error()})
-			return
-		}
-
-		c.JSON(http.StatusOK, favorites)
-	}
-}
-
-func AddToFavorite(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		userId := c.Param("userId")
-		restaurantId := c.Param("restaurantId")
-		var user models.User
-		if err := db.First(&user, userId).Error; err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-			return
-		}
-		fmt.Printf("User ID: %s\n", userId)
-		fmt.Printf("Restaurant ID: %s\n", restaurantId)
-		// Add to favorites
-		restId, err := strconv.ParseUint(restaurantId, 10, 32)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid restaurant ID"})
 			return
 		}
 		err = user.AddToFavorites(db, uint(restId))
@@ -345,5 +257,72 @@ func AddToFavorite(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"message": "Restaurant added to favorites"})
+	}
+}
+
+// GetAvailableTables handles the enhanced table selection API with comprehensive filtering
+func GetAvailableTables(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Extract restaurant ID from URL parameter - following established pattern
+		restaurantIDStr := c.Param("restaurantId")
+		restaurantID, err := strconv.ParseUint(restaurantIDStr, 10, 32)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid restaurant ID format"})
+			return
+		}
+
+		// Validate restaurant exists
+		var restaurant models.Restaurant
+		if err := db.First(&restaurant, uint(restaurantID)).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Restaurant not found"})
+			} else {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Error validating restaurant"})
+			}
+			return
+		}
+
+		// Validate and parse query parameters using our utility
+		filters, err := utilities.ValidateTableFilters(c)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Build dynamic query for available tables
+		query := utilities.BuildAvailableTableQuery(db, uint(restaurantID), filters)
+
+		// Execute query to get matching tables
+		var tables []models.Table
+		if err := query.Find(&tables).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error fetching tables"})
+			return
+		}
+
+		// Convert to API response format optimized for React Native
+		var results []utilities.TableQueryResult
+		for _, table := range tables {
+			results = append(results, utilities.ConvertTableToResult(table))
+		}
+
+		// Build comprehensive response
+		response := gin.H{
+			"restaurant": gin.H{
+				"id":   restaurant.RestaurantId,
+				"name": restaurant.Name,
+			},
+			"filters": gin.H{
+				"zone":        filters.Zone,
+				"tableType":   filters.TableType,
+				"view":        filters.View,
+				"minCapacity": filters.MinCapacity,
+				"maxCapacity": filters.MaxCapacity,
+				"available":   filters.Available,
+			},
+			"tables": results,
+			"count":  len(results),
+		}
+
+		c.JSON(http.StatusOK, response)
 	}
 }
