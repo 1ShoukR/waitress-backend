@@ -119,19 +119,55 @@ type Order struct {
 
 // Table represents a table record in the database.
 type Table struct {
-	TableID             uint   `gorm:"primaryKey;autoIncrement"`
-	RestaurantID        uint   `gorm:"not null"`
-	ReservationID       *uint  // It's a pointer to allow nil value when no reservation is associated
-	TableNumber         uint   `gorm:"not null"`
-	Capacity            uint   `gorm:"not null"`
-	LocationDescription string `gorm:"size:200"` // Description of the table's location
-	IsReserved          bool   `gorm:"default:false"`
-	CustomerID          *uint  // It's a pointer to allow nil value when no customer is associated
+	TableID       uint   `gorm:"primaryKey;autoIncrement"`
+	RestaurantID  uint   `gorm:"not null"`
+	ReservationID *uint  // It's a pointer to allow nil value when no reservation is associated
+	TableNumber   string `gorm:"not null"` // Changed from uint to string for flexible naming like "T1", "Window-3"
+	Capacity      uint   `gorm:"not null"`
+
+	LocationZone        string `gorm:"size:50"`  // "inside", "outside", "patio", "bar"
+	LocationDescription string `gorm:"size:200"` // "corner booth", "center dining", "by kitchen"
+	ViewDescription     string `gorm:"size:200"` // "street view", "garden view", "no view"
+	TableType           string `gorm:"size:50"`  // "booth", "standard", "high-top", "bar-seat"
+
+	IsAvailable bool  `gorm:"default:true"`  // Can table be reserved (not broken, etc.)
+	IsReserved  bool  `gorm:"default:false"` // Currently reserved
+	CustomerID  *uint // Current customer if occupied
+
+	CoordinateX *float64 `gorm:"default:null"` // Grid X position
+	CoordinateY *float64 `gorm:"default:null"` // Grid Y position
+	Width       *float64 `gorm:"default:null"` // Table width in grid units
+	Height      *float64 `gorm:"default:null"` // Table height in grid units
+	Rotation    *float64 `gorm:"default:null"` // Rotation angle in degrees
+
+	CreatedAt time.Time      `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+	UpdatedAt time.Time      `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
 	// Define relationships
-	// Restaurant   Restaurant `gorm:"foreignKey:RestaurantID"`
-	// Reservation  Reservation `gorm:"foreignKey:ReservationID"`
-	// Customer     User        `gorm:"foreignKey:CustomerID"`
+	Restaurant  Restaurant   `gorm:"foreignKey:RestaurantID"`
+	Reservation *Reservation `gorm:"foreignKey:ReservationID"`
+	Customer    *User        `gorm:"foreignKey:CustomerID"`
+}
+
+// RestaurantLayout represents the visual layout configuration for a restaurant
+type RestaurantLayout struct {
+	LayoutID        uint      `gorm:"primaryKey;autoIncrement"`
+	RestaurantID    uint      `gorm:"not null;unique"` // One layout per restaurant
+	FloorplanURL    *string   `gorm:"size:500"`        // Future: uploaded floorplan image
+	GridWidth       *int      `gorm:"default:null"`    // Grid dimensions for coordinate system
+	GridHeight      *int      `gorm:"default:null"`
+	ScaleFactor     *float64  `gorm:"default:null"` // Pixels per grid unit
+	BackgroundColor *string   `gorm:"size:7"`       // Hex color for background
+	CreatedAt       time.Time `gorm:"column:created_at;type:timestamp;not null;default:CURRENT_TIMESTAMP"`
+	UpdatedAt       time.Time `gorm:"column:updated_at;type:timestamp;not null;default:CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"`
+
+	// Relationships
+	Restaurant Restaurant `gorm:"foreignKey:RestaurantID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+}
+
+func (RestaurantLayout) TableName() string {
+	return "restaurant_layouts"
 }
 
 // CalcAvgRating calculates the average rating for a restaurant.

@@ -44,6 +44,7 @@ func (gs *GenericSeeder) Seed(db *gorm.DB) error {
 	}
 	return nil
 }
+
 // UserSeeder is a struct that implements the Seeder interface
 type UserSeeder struct{}
 
@@ -59,18 +60,18 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		return err
 	}
 	cities := map[string]struct {
-	BaseLat  float64
-	BaseLong float64
-}{
-	"New York":    {40.730610, -73.935242},
-	"Los Angeles": {34.052235, -118.243683},
-	"Chicago":     {41.878113, -87.629799},
-	"Houston":     {29.760427, -95.369804},
-	"Miami":       {25.761681, -80.191788},
-	"Atlanta":     {33.7490, -84.3880}, // Added Atlanta
-	"Cincinnati":  {39.1031, -84.5120},  // Added Cincinnati
-	"Toronto":     {43.651070, -79.347015}, // Added Toronto
-}
+		BaseLat  float64
+		BaseLong float64
+	}{
+		"New York":    {40.730610, -73.935242},
+		"Los Angeles": {34.052235, -118.243683},
+		"Chicago":     {41.878113, -87.629799},
+		"Houston":     {29.760427, -95.369804},
+		"Miami":       {25.761681, -80.191788},
+		"Atlanta":     {33.7490, -84.3880},     // Added Atlanta
+		"Cincinnati":  {39.1031, -84.5120},     // Added Cincinnati
+		"Toronto":     {43.651070, -79.347015}, // Added Toronto
+	}
 	baseLat, baseLong := 40.730610, -73.935242 // Central coordinates for Manhattan
 	variance := 0.01
 	// Define the users with their passwords
@@ -86,15 +87,28 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		{UserID: 3, RestaurantID: 3, TableID: 3, Time: time.Now().Add(48 * time.Hour)}, // in two days
 	}
 	tables := []struct {
-		RestaurantID  uint
-		ReservationID uint
-		TableNumber   uint
-		Capacity      uint
-		IsReserved    bool
+		RestaurantID        uint
+		ReservationID       uint
+		TableNumber         string
+		Capacity            uint
+		LocationZone        string
+		LocationDescription string
+		ViewDescription     string
+		TableType           string
+		IsAvailable         bool
+		IsReserved          bool
 	}{
-		{RestaurantID: 1, ReservationID: 1, TableNumber: 1, Capacity: 4, IsReserved: true},
-		{RestaurantID: 2, ReservationID: 2, TableNumber: 2, Capacity: 4, IsReserved: true},
-		{RestaurantID: 3, ReservationID: 3, TableNumber: 3, Capacity: 4, IsReserved: true},
+		{RestaurantID: 1, ReservationID: 1, TableNumber: "T1", Capacity: 4, LocationZone: "inside", LocationDescription: "corner booth by window", ViewDescription: "street view", TableType: "booth", IsAvailable: true, IsReserved: true},
+		{RestaurantID: 1, ReservationID: 0, TableNumber: "T2", Capacity: 2, LocationZone: "inside", LocationDescription: "center dining area", ViewDescription: "no view", TableType: "standard", IsAvailable: true, IsReserved: false},
+		{RestaurantID: 1, ReservationID: 0, TableNumber: "T3", Capacity: 6, LocationZone: "inside", LocationDescription: "near kitchen", ViewDescription: "no view", TableType: "standard", IsAvailable: true, IsReserved: false},
+		{RestaurantID: 1, ReservationID: 0, TableNumber: "B1", Capacity: 2, LocationZone: "outside", LocationDescription: "patio seating", ViewDescription: "garden view", TableType: "standard", IsAvailable: true, IsReserved: false},
+		{RestaurantID: 1, ReservationID: 0, TableNumber: "Bar-1", Capacity: 1, LocationZone: "bar", LocationDescription: "bar counter", ViewDescription: "kitchen view", TableType: "bar-seat", IsAvailable: true, IsReserved: false},
+
+		{RestaurantID: 2, ReservationID: 2, TableNumber: "T1", Capacity: 4, LocationZone: "inside", LocationDescription: "window booth", ViewDescription: "street view", TableType: "booth", IsAvailable: true, IsReserved: true},
+		{RestaurantID: 2, ReservationID: 0, TableNumber: "T2", Capacity: 2, LocationZone: "inside", LocationDescription: "cozy corner", ViewDescription: "no view", TableType: "standard", IsAvailable: true, IsReserved: false},
+
+		{RestaurantID: 3, ReservationID: 3, TableNumber: "T1", Capacity: 4, LocationZone: "inside", LocationDescription: "sushi bar seating", ViewDescription: "chef view", TableType: "high-top", IsAvailable: true, IsReserved: true},
+		{RestaurantID: 3, ReservationID: 0, TableNumber: "T2", Capacity: 2, LocationZone: "inside", LocationDescription: "private dining area", ViewDescription: "no view", TableType: "standard", IsAvailable: true, IsReserved: false},
 	}
 	defaultClients := []struct {
 		AccessRevoked      *time.Time
@@ -109,52 +123,52 @@ func (us *UserSeeder) Seed(db *gorm.DB) error {
 		{nil, nil, "mobile", `b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"`, nil, "iOS", "waitress-mobile-ios"},
 		{nil, nil, "mobile", `b"\x94l\xc5\xf3\xa6\xe4W\xe3\xb4\x83\x13&+\xe0U\x02\xadK\x1e\x1a\xb8\xc37"`, nil, "Android", "waitress-mobile-android"},
 	}
-var mockMenuItems = map[string][]struct {
-	RestaurantID uint
-	NameOfItem   string
-	Price        float64
-	Category     string
-	ImageURL     *string
-	IsAvailable  bool
-	Description  string
-}{
-	"Appetizers": {
-		{RestaurantID: 1, NameOfItem: "Bruschetta", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1668095398193-58a63a440464?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Grilled bread topped with tomatoes, olive oil, and basil."},
-		{RestaurantID: 1, NameOfItem: "Spring Rolls", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1695712641569-05eee7b37b6d?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Crispy rolls filled with vegetables and served with a dipping sauce."},
-		{RestaurantID: 1, NameOfItem: "Garlic Bread", Price: 4.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1676976198546-18595f0796f0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Toasted bread with garlic butter and herbs."},
-		{RestaurantID: 1, NameOfItem: "Caprese Salad", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1622637103261-ae624e188bd0?q=80&w=2660&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fresh mozzarella, tomatoes, and basil drizzled with balsamic glaze."},
-		{RestaurantID: 1, NameOfItem: "Mozzarella Sticks", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fried cheese sticks served with marinara sauce."},
-		{RestaurantID: 1, NameOfItem: "Nachos", Price: 8.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1582169296194-e4d644c48063?q=80&w=2600&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Tortilla chips topped with cheese, jalapeños, and sour cream."},
-		{RestaurantID: 1, NameOfItem: "Guacamole", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1680992071073-cb1696ba8d3e?q=80&w=2674&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Creamy avocado dip with tomatoes, onions, and lime."},
-		{RestaurantID: 1, NameOfItem: "Edamame", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1666318300285-d97528868ff4?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Steamed young soybeans sprinkled with sea salt."},
-		{RestaurantID: 1, NameOfItem: "Miso Soup", Price: 3.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1664391950572-bc4b1bdd1268?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Traditional Japanese soup with tofu, seaweed, and scallions."},
-		{RestaurantID: 1, NameOfItem: "Garlic Knots", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1629321962567-e15cd77bb5ec?q=80&w=2674&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Soft bread knots coated in garlic butter and Parmesan."},
-	},
-	"Mains": {
-		{RestaurantID: 1, NameOfItem: "Spaghetti Carbonara", Price: 12.99, Category: "Mains", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1705409892694-39677f828078?q=80&w=2706&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Pasta with creamy egg sauce, pancetta, and Parmesan."},
-		{RestaurantID: 1, NameOfItem: "Sweet and Sour Chicken", Price: 10.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1705596704813-b39b95549cd2?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fried chicken pieces in a sweet and tangy sauce with pineapple."},
-		{RestaurantID: 1, NameOfItem: "Butter Chicken", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Chicken cooked in a rich and creamy tomato sauce."},
-		{RestaurantID: 1, NameOfItem: "Lasagna", Price: 13.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1709429790175-b02bb1b19207?q=80&w=2664&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Layered pasta with beef, ricotta, mozzarella, and marinara sauce."},
-		{RestaurantID: 1, NameOfItem: "Margherita Pizza", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1672198597143-45a4b5f064c9?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Classic pizza with fresh tomatoes, mozzarella, and basil."},
-		{RestaurantID: 1, NameOfItem: "Sushi Platter", Price: 19.99, Category: "Mains", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1668146927669-f2edf6e86f6f?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Assorted sushi rolls and nigiri with soy sauce and wasabi."},
-		{RestaurantID: 1, NameOfItem: "Tempura Udon", Price: 14.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1629127524579-269c62b90a96?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Udon noodles in broth with tempura shrimp and vegetables."},
-		{RestaurantID: 1, NameOfItem: "Taco Platter", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?q=80&w=2694&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Assorted tacos with beef, chicken, and vegetarian options."},
-		{RestaurantID: 1, NameOfItem: "Burrito", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1662116765994-1e4200c43589?q=80&w=2664&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Flour tortilla filled with rice, beans, meat, and toppings."},
-		{RestaurantID: 1, NameOfItem: "Pepperoni Pizza", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=2680&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Classic pizza with pepperoni slices and mozzarella cheese."},
-	},
-	"Desserts": {
-		{RestaurantID: 1, NameOfItem: "Tiramisu", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1712262582533-dcf8deba14a3?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Italian dessert with layers of coffee-soaked ladyfingers and mascarpone."},
-		{RestaurantID: 1, NameOfItem: "Mango Sticky Rice", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1711161988375-da7eff032e45?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Sweet sticky rice served with ripe mango slices and coconut milk."},
-		{RestaurantID: 1, NameOfItem: "Panna Cotta", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1613505411792-208b15f862b0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Creamy Italian dessert topped with berry compote."},
-		{RestaurantID: 1, NameOfItem: "Gelato", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1675279010969-e85bfbd402dc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Rich and creamy Italian ice cream available in various flavors."},
-		{RestaurantID: 1, NameOfItem: "Mochi Ice Cream", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1701104845244-1748f70ca895?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Japanese rice cake filled with ice cream."},
-		{RestaurantID: 1, NameOfItem: "Green Tea Cake", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1716647126905-3acaec3fc2e7?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Moist cake infused with green tea flavor and topped with frosting."},
-		{RestaurantID: 1, NameOfItem: "Churros", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1713962962200-e33e90cb2c60?q=80&w=2669&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fried dough pastries dusted with cinnamon sugar."},
-		{RestaurantID: 1, NameOfItem: "Flan", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1679959350482-9585bf3e72fd?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Creamy caramel custard dessert."},
-		{RestaurantID: 1, NameOfItem: "Cannoli", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1555234557-062e321607cf?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Crispy pastry shells filled with sweet ricotta cream."},
-		{RestaurantID: 1, NameOfItem: "Tartufo", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1668434344247-5daf7c7aff63?q=80&w=2680&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Chocolate-coated ice cream with a cherry and almond center."},
-	},
-}
+	var mockMenuItems = map[string][]struct {
+		RestaurantID uint
+		NameOfItem   string
+		Price        float64
+		Category     string
+		ImageURL     *string
+		IsAvailable  bool
+		Description  string
+	}{
+		"Appetizers": {
+			{RestaurantID: 1, NameOfItem: "Bruschetta", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1668095398193-58a63a440464?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Grilled bread topped with tomatoes, olive oil, and basil."},
+			{RestaurantID: 1, NameOfItem: "Spring Rolls", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1695712641569-05eee7b37b6d?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Crispy rolls filled with vegetables and served with a dipping sauce."},
+			{RestaurantID: 1, NameOfItem: "Garlic Bread", Price: 4.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1676976198546-18595f0796f0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Toasted bread with garlic butter and herbs."},
+			{RestaurantID: 1, NameOfItem: "Caprese Salad", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1622637103261-ae624e188bd0?q=80&w=2660&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fresh mozzarella, tomatoes, and basil drizzled with balsamic glaze."},
+			{RestaurantID: 1, NameOfItem: "Mozzarella Sticks", Price: 7.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1623653387945-2fd25214f8fc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fried cheese sticks served with marinara sauce."},
+			{RestaurantID: 1, NameOfItem: "Nachos", Price: 8.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1582169296194-e4d644c48063?q=80&w=2600&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Tortilla chips topped with cheese, jalapeños, and sour cream."},
+			{RestaurantID: 1, NameOfItem: "Guacamole", Price: 6.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1680992071073-cb1696ba8d3e?q=80&w=2674&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Creamy avocado dip with tomatoes, onions, and lime."},
+			{RestaurantID: 1, NameOfItem: "Edamame", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1666318300285-d97528868ff4?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Steamed young soybeans sprinkled with sea salt."},
+			{RestaurantID: 1, NameOfItem: "Miso Soup", Price: 3.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1664391950572-bc4b1bdd1268?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Traditional Japanese soup with tofu, seaweed, and scallions."},
+			{RestaurantID: 1, NameOfItem: "Garlic Knots", Price: 5.99, Category: "Appetizers", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1629321962567-e15cd77bb5ec?q=80&w=2674&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Soft bread knots coated in garlic butter and Parmesan."},
+		},
+		"Mains": {
+			{RestaurantID: 1, NameOfItem: "Spaghetti Carbonara", Price: 12.99, Category: "Mains", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1705409892694-39677f828078?q=80&w=2706&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Pasta with creamy egg sauce, pancetta, and Parmesan."},
+			{RestaurantID: 1, NameOfItem: "Sweet and Sour Chicken", Price: 10.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1705596704813-b39b95549cd2?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fried chicken pieces in a sweet and tangy sauce with pineapple."},
+			{RestaurantID: 1, NameOfItem: "Butter Chicken", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Chicken cooked in a rich and creamy tomato sauce."},
+			{RestaurantID: 1, NameOfItem: "Lasagna", Price: 13.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1709429790175-b02bb1b19207?q=80&w=2664&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Layered pasta with beef, ricotta, mozzarella, and marinara sauce."},
+			{RestaurantID: 1, NameOfItem: "Margherita Pizza", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1672198597143-45a4b5f064c9?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Classic pizza with fresh tomatoes, mozzarella, and basil."},
+			{RestaurantID: 1, NameOfItem: "Sushi Platter", Price: 19.99, Category: "Mains", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1668146927669-f2edf6e86f6f?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Assorted sushi rolls and nigiri with soy sauce and wasabi."},
+			{RestaurantID: 1, NameOfItem: "Tempura Udon", Price: 14.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1629127524579-269c62b90a96?q=80&w=2574&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Udon noodles in broth with tempura shrimp and vegetables."},
+			{RestaurantID: 1, NameOfItem: "Taco Platter", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1599974579688-8dbdd335c77f?q=80&w=2694&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Assorted tacos with beef, chicken, and vegetarian options."},
+			{RestaurantID: 1, NameOfItem: "Burrito", Price: 9.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1662116765994-1e4200c43589?q=80&w=2664&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Flour tortilla filled with rice, beans, meat, and toppings."},
+			{RestaurantID: 1, NameOfItem: "Pepperoni Pizza", Price: 11.99, Category: "Mains", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1628840042765-356cda07504e?q=80&w=2680&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Classic pizza with pepperoni slices and mozzarella cheese."},
+		},
+		"Desserts": {
+			{RestaurantID: 1, NameOfItem: "Tiramisu", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1712262582533-dcf8deba14a3?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Italian dessert with layers of coffee-soaked ladyfingers and mascarpone."},
+			{RestaurantID: 1, NameOfItem: "Mango Sticky Rice", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1711161988375-da7eff032e45?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Sweet sticky rice served with ripe mango slices and coconut milk."},
+			{RestaurantID: 1, NameOfItem: "Panna Cotta", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1613505411792-208b15f862b0?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Creamy Italian dessert topped with berry compote."},
+			{RestaurantID: 1, NameOfItem: "Gelato", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1675279010969-e85bfbd402dc?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Rich and creamy Italian ice cream available in various flavors."},
+			{RestaurantID: 1, NameOfItem: "Mochi Ice Cream", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1701104845244-1748f70ca895?q=80&w=2671&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Japanese rice cake filled with ice cream."},
+			{RestaurantID: 1, NameOfItem: "Green Tea Cake", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1716647126905-3acaec3fc2e7?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Moist cake infused with green tea flavor and topped with frosting."},
+			{RestaurantID: 1, NameOfItem: "Churros", Price: 4.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://plus.unsplash.com/premium_photo-1713962962200-e33e90cb2c60?q=80&w=2669&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Fried dough pastries dusted with cinnamon sugar."},
+			{RestaurantID: 1, NameOfItem: "Flan", Price: 5.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1679959350482-9585bf3e72fd?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Creamy caramel custard dessert."},
+			{RestaurantID: 1, NameOfItem: "Cannoli", Price: 6.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1555234557-062e321607cf?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Crispy pastry shells filled with sweet ricotta cream."},
+			{RestaurantID: 1, NameOfItem: "Tartufo", Price: 7.99, Category: "Desserts", ImageURL: utilities.StringPtr("https://images.unsplash.com/photo-1668434344247-5daf7c7aff63?q=80&w=2680&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"), IsAvailable: true, Description: "Chocolate-coated ice cream with a cherry and almond center."},
+		},
+	}
 	users := []struct {
 		FirstName string
 		LastName  string
@@ -318,7 +332,6 @@ var mockMenuItems = map[string][]struct {
 		{"Seafood Heaven", "901 Ocean Blvd", "416-234-5678", "contact@seafoodheaven.com", rand.Intn(91) + 10, "mayaspencer2024@example.com", "https://images.unsplash.com/photo-1586796675683-cdf2694b51e3", []models.Category{{CategoryName: "Seafood"}}, "Toronto"},
 		{"Toronto Sweets", "123 Sweet St", "416-345-6789", "info@torontosweets.com", rand.Intn(91) + 10, "leonicholson2024@example.com", "https://images.unsplash.com/photo-1578985545062-69928b1d9587", []models.Category{{CategoryName: "Desserts"}}, "Toronto"},
 	}
-
 
 	ratings := []struct {
 		Comment      string
@@ -497,10 +510,15 @@ var mockMenuItems = map[string][]struct {
 		}
 
 		table := models.Table{
-			RestaurantID: data.RestaurantID,
-			TableNumber:  data.TableNumber,
-			Capacity:     data.Capacity,
-			IsReserved:   data.IsReserved,
+			RestaurantID:        data.RestaurantID,
+			TableNumber:         data.TableNumber,
+			Capacity:            data.Capacity,
+			LocationZone:        data.LocationZone,
+			LocationDescription: data.LocationDescription,
+			ViewDescription:     data.ViewDescription,
+			TableType:           data.TableType,
+			IsAvailable:         data.IsAvailable,
+			IsReserved:          data.IsReserved,
 		}
 		if err := tx.Create(&table).Error; err != nil {
 			tx.Rollback()
@@ -530,23 +548,23 @@ var mockMenuItems = map[string][]struct {
 			}
 		}
 	}
-// 	for category, items := range mockMenuItems {
-// 		for _, item := range items {
-// 			menuItem := models.MenuItem{
-// 				RestaurantID: item.RestaurantID,
-// 				NameOfItem:   &item.NameOfItem,
-// 				Price:        &item.Price,
-// 				Category:     &category,
-// 				IsAvailable:  item.IsAvailable,
-// 				ImageURL:     item.ImageURL,
-// 				Description:  &item.Description,
-// 			}
-// 			if err := tx.Create(&menuItem).Error; err != nil {
-// 				tx.Rollback()
-// 				return fmt.Errorf("failed to create menu item for restaurant %d: %v", item.RestaurantID, err)
-// 			}
-// 	}
-// }
+	// 	for category, items := range mockMenuItems {
+	// 		for _, item := range items {
+	// 			menuItem := models.MenuItem{
+	// 				RestaurantID: item.RestaurantID,
+	// 				NameOfItem:   &item.NameOfItem,
+	// 				Price:        &item.Price,
+	// 				Category:     &category,
+	// 				IsAvailable:  item.IsAvailable,
+	// 				ImageURL:     item.ImageURL,
+	// 				Description:  &item.Description,
+	// 			}
+	// 			if err := tx.Create(&menuItem).Error; err != nil {
+	// 				tx.Rollback()
+	// 				return fmt.Errorf("failed to create menu item for restaurant %d: %v", item.RestaurantID, err)
+	// 			}
+	// 	}
+	// }
 
 	for _, r := range reservations {
 		reservation := models.Reservation{
