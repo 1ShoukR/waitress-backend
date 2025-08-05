@@ -163,7 +163,7 @@ func GetReservations(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the restaurant ID from the URL parameter
-		restaurantIDStr := c.Param("id")
+		restaurantIDStr := c.Param("restaurantId") // Fixed: match route parameter name
 		restaurantID, err := strconv.Atoi(restaurantIDStr)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid restaurant ID"})
