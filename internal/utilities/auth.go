@@ -15,19 +15,86 @@
 // - NewAuthGroups
 // - printSessionValues
 
-
 package utilities
 
 import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"strings"
+	"time"
 	"waitress-backend/internal/models"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
+
+// JWT secret key for token validation
+var jwtSecretKey = []byte(os.Getenv("JWT_SECRET"))
+
+// JWTClaims represents the claims stored in JWT tokens
+type JWTClaims struct {
+	UserID   uint   `json:"userID"`
+	Email    string `json:"email"`
+	AuthType string `json:"authType"`
+	jwt.RegisteredClaims
+}
+
+// validateJWTToken verifies and parses a JWT token, returning the claims
+func validateJWTToken(tokenString string) (*JWTClaims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtSecretKey, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	if claims, ok := token.Claims.(*JWTClaims); ok && token.Valid {
+		// Check if token is expired
+		if time.Now().Unix() > claims.ExpiresAt.Unix() {
+			return nil, errors.New("token is expired")
+		}
+		return claims, nil
+	}
+
+	return nil, errors.New("invalid token")
+}
+
+// extractJWTFromHeader extracts JWT token from Authorization header
+func extractJWTFromHeader(c *gin.Context) (string, error) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		return "", errors.New("authorization header not found")
+	}
+
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return "", errors.New("invalid authorization header format")
+	}
+
+	return strings.TrimPrefix(authHeader, "Bearer "), nil
+}
+
+// getAuthTypeFromJWT extracts auth type from JWT token
+func getAuthTypeFromJWT(c *gin.Context) (string, error) {
+	tokenString, err := extractJWTFromHeader(c)
+	if err != nil {
+		return "", err
+	}
+
+	claims, err := validateJWTToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+
+	return claims.AuthType, nil
+}
 
 // UserType defines the different types of users in the system.
 type UserType string
@@ -198,17 +265,27 @@ func ClientRequired(clientTypes ...string) gin.HandlerFunc {
 }
 
 // Gin middleware that ensures the request is made by an authorized user.
+// Supports both JWT token authentication (mobile) and session authentication (web)
 func UserRequired(authGroups AuthGroups, group, subgroup string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authType, err := getAuthTypeFromSession(c)
-		if err != nil {
-			fmt.Println("Error getting auth type from session:", err)
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
-			c.Abort()
-			return
-		}
+		var authType string
+		var err error
 
-		fmt.Println("Auth type fetched:", authType)
+		// Try JWT authentication first (for mobile apps)
+		authType, err = getAuthTypeFromJWT(c)
+		if err != nil {
+			// JWT authentication failed, try session authentication (for web)
+			authType, err = getAuthTypeFromSession(c)
+			if err != nil {
+				fmt.Println("Both JWT and session authentication failed:", err)
+				c.JSON(http.StatusUnauthorized, gin.H{"error": "Authentication required"})
+				c.Abort()
+				return
+			}
+			fmt.Println("Authenticated via session with auth type:", authType)
+		} else {
+			fmt.Println("Authenticated via JWT with auth type:", authType)
+		}
 
 		var allowedUsers map[UserType]struct{}
 		var ok bool
@@ -243,7 +320,7 @@ func UserRequired(authGroups AuthGroups, group, subgroup string) gin.HandlerFunc
 			return
 		}
 
-		fmt.Println("User is permitted, proceeding")
+		fmt.Println("User is permitted, proceeding with auth type:", authType)
 		c.Next()
 	}
 }
