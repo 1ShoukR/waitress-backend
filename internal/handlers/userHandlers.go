@@ -1,4 +1,4 @@
-// This file contains the handlers for user related endpoints 
+// This file contains the handlers for user related endpoints
 //
 // The handlers here are as follows:
 // - CreateUser
@@ -6,14 +6,14 @@
 // - UpdateUserLocation
 // - UpdateUserAccountInformation
 
-
 package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
-	"fmt"
+
 	"golang.org/x/crypto/bcrypt"
 
 	// "waitress-backend/internal/handlers"
@@ -70,7 +70,7 @@ func CreateUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		token, err := createToken(newUser.Email)
+		token, err := createToken(newUser)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "Error creating token"})
 			return
@@ -87,6 +87,7 @@ func CreateUser(db *gorm.DB) gin.HandlerFunc {
 		})
 	}
 }
+
 // GetUser is a handler for getting all users in the database
 func GetUser(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
