@@ -172,8 +172,8 @@ func GetSingleRestaurant(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 
 		var restaurant models.Restaurant
 
-		// Query for the restaurant by ID
-		err = db.First(&restaurant, restaurantID).Error
+		// Query for the restaurant by ID with all necessary associations
+		err = db.Preload("MenuItems").Preload("Categories").Preload("Ratings").First(&restaurant, restaurantID).Error
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
 				c.JSON(http.StatusNotFound, gin.H{"error": "Restaurant not found"})
