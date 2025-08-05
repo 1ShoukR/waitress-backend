@@ -38,10 +38,12 @@ type LoginRequest struct {
 var secretKey = []byte(os.Getenv("JWT_SECRET"))
 
 // Function to create an authentication token for a user
-func createToken(username string) (string, error) {
+func createToken(user models.User) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,
 		jwt.MapClaims{
-			"username": username,
+			"userID":   user.UserID,
+			"email":    user.Email,
+			"authType": user.AuthType,
 			"exp":      time.Now().Add(time.Hour * 24).Unix(),
 		})
 
@@ -121,7 +123,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			c.IndentedJSON(http.StatusUnauthorized, gin.H{"message": "Invalid login credentials"})
 			return
 		}
-		token, err := createToken((foundUser.Email))
+		token, err := createToken((foundUser))
 		if err != nil {
 			c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error creating token"})
 			return
@@ -152,7 +154,7 @@ func Login(db *gorm.DB, router *gin.Engine) gin.HandlerFunc {
 			Address   *string   `json:"address"`
 			CreatedAt time.Time `json:"createdAt"`
 		}
-		// Custom response; modify as needed. 
+		// Custom response; modify as needed.
 		response := CustomUserResponse{
 			UserID:    foundUser.UserID,
 			FirstName: foundUser.Entity.FirstName,
